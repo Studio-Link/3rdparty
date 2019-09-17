@@ -1,60 +1,48 @@
 sudo: required
 git:
   depth: false
-
 services:
-  - docker
-
+- docker
 language: c
-
 os:
-  - linux
-  - osx
-
+- linux
+- osx
 dist: xenial
 osx_image: xcode8.3
-
 before_install:
-  - sudo ./dist/before_build.sh
-  - "./dist/before_build.sh"
-
+- sudo ./dist/before_build.sh
+- "./dist/before_build.sh"
 script: "./dist/build.sh"
-
 deploy:
-  - provider: releases
-    api_key:
-      secure: R7Qo1n7SPn0lumai6BssUVXInVoS3ZylraT0OJOeJpN9iLE4iri4p4unrJV7PiVetxsscGYQ0ijnTG2q0DymjiD0eKNBaMmx5os5mvi1x7VBDtAW1Ki53N/S4EQMF0JKEbeKzuW0Jsp21wGEv3ZDpdq2u8Bf+M1+qEpYz0t8FU8gtFLIrpfszUqv9L+wOcnEwepiZUGRD1czfM7lJ39bkOC5gSaskekcydk3qECzdlZdh4e4vnlI9ymNOvDiaPtBiXgDVBhq4QVCuOy696k2NKD9cpeLLblgxSYDTphQAfLZn93CQ0Knx3wr8YImVJA6qtprPuoPLgS3HWZW0uxVdLqKTsqIH6YbSbjK6Awg1xJhiWJMwK2oDC1EU6+RgeaV7x3KbmT7prJiZQGfhp5mWIxoGvXabLrwh17JInWYyq8+CS3xDdTEykQmZYsAEW6CR96Ie4YnrK9YjwE+PVwUiwyiGhKzdato4br9lKs6nrZpXwydYUvWqNfNeaQtFjiHSkb6Gac2Dj7PliWnScm/qq9imaq/Riz9L/X6Gogw9CFSVdf8pM932Jgl65dIf99BMJT4uBCcWddCpEgKa8/RMRDLp38GiJQbw6CSQUVs4zHBtT2PbiurCp5TBmrRvwOYOAfcbPoTJ+lx9nAG4pULHW2HdXBkC0hRSuTUZOFu/G8=
-    file: 
-      - build/$BUILD_OS.zip
-    skip_cleanup: true
-    on:
-      tags: true
-
+  provider: releases
+  api_key:
+    secure: fyBieKSOG6TeCeQUXacsrfWayZ7DyGwm68LyQ3qVVyJDhFrnMRkWT2+iObdT8yww3EW6uWPqv+LQ4AgGa2ntKwZPodWvvIoE6eXmCFrraM3nHObrl/rZMQgp6zwutior3SIxhJzdZ2orRVHIt6X4wHCstc9n38FFJ0GUKWK5JgUgfv1HI7URjzdlCOoN3fi8O1ATn4hilitLn/nEqcGUTgEqDhvSTek730PuY34Po1TeF0SaqhazQBh6DsChSvZPfsy3QnePByXa45VspCgg9TFj4kAM/gL2ek3qwtk8XsBjnmTjSwWGuBH5p1+bMvV/CJHdXF2MT2ovSJyslW9+2ZVPtqYh6TfCl9auAKOc2u2KdOnhSOZ6QSkO2z+1x2Sdg+iAxm0k8GP6J7JVptzklAqclBzUHPwGTrVHQt0pqFGgcSby4ZlO0WAblF1ABfI8XmPYhx1fHEBZ6cAR0+GL/cqUL8C/HPrM7JQowlGDju+CVx7mFUfgcSiVaUE7imWPDV/ODYfPOKjrAgfUhJo6lXqGPeigdoafZvv1UOfdvP//OTrwH6Ch9R/GzZUqW9J5Lz4pU8qgnIxbhYagZdCzLXvi1Gm52fFMx0ismmuYd2WgBhDXHSlANmaHuLNmtyINilHc6yI/bNPe1wzepbc5WpMB5NVTAVeZGi204k4X0Qk=
+  file: build/$BUILD_OS.zip
+  on:
+    tags: true
 env:
   matrix:
-    - BUILD_OS="windows64"
-    - BUILD_OS="windows32"
-    - BUILD_OS="linux"         
-    - BUILD_OS="osx"
-
-matrix:              
-        exclude:            
-          - os: osx                
-            env: BUILD_OS="windows32"
-          - os: osx                
-            env: BUILD_OS="windows64"
-          - os: osx          
-            env: BUILD_OS="linux"         
-          - os: linux          
-            env: BUILD_OS="osx"
-
+  - BUILD_OS="windows64"
+  - BUILD_OS="windows32"
+  - BUILD_OS="linux"
+  - BUILD_OS="osx"
+matrix:
+  exclude:
+  - os: osx
+    env: BUILD_OS="windows32"
+  - os: osx
+    env: BUILD_OS="windows64"
+  - os: osx
+    env: BUILD_OS="linux"
+  - os: linux
+    env: BUILD_OS="osx"
 arch:
-        packages:
-            - wget
-            - perl
-            - zip
-            - unzip
-            - vim
-            - npm
-        script:
-            - "./dist/build_windows.sh"
+  packages:
+  - wget
+  - perl
+  - zip
+  - unzip
+  - vim
+  - npm
+  script:
+  - "./dist/build_windows.sh"
