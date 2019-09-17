@@ -47,8 +47,8 @@ deploy:
 
 env:
   matrix:
-#    - BUILD_OS="windows64"
-#    - BUILD_OS="windows32"
+    - BUILD_OS="windows64"
+    - BUILD_OS="windows32"
     - BUILD_OS="linux"         
     - BUILD_OS="osx"
 
