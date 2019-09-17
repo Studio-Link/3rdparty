@@ -101,4 +101,4 @@ fi
 s3_path="s3_upload/3rdparty/$version_t"
 mkdir -p $s3_path
 zip -r $BUILD_OS.zip my_include openssl
-mv $BUILD_OS.zip $s3_path
+cp $BUILD_OS.zip $s3_path
