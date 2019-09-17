@@ -29,19 +29,6 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
-  - provider: s3
-    access_key_id: "AKIAJ3CDJMCPJXIU5TTA"
-    secret_access_key:
-      secure: AO/SfGSdeyrMT8/djYgR+TIgnBqggXiW9gaoc208NbcWGfbzgfY3hOse/QSAI7K6qw+sL8HW5i7kf5r6YtHM4g3ProXY5UBF7N7BPjcm1UoPI3W4qOBv2Rr7fX73OhJ+pVjx4jTd+7W87KF4vH5+5DzSfEwgjw4oQxPXEjUj4ZCCeTBMoRas9Qx0h0g+76r9ogXAi9Opke4gp9vz4ONRajaTG+/PPhVGcMlSxEIRgS0S7cqrmpaJ5Dfq4vxjl/eMd2D2LEbC1F2wfegxc2+0aMqlvkmqZYk2rRigZx8ayVasWQGQkX3npgOsy4pRLggn/9d9nt7qqLPkRo/Cd2iGsaNGClTZRiyCc1gN+WIByazQ6RHRYldQhTxOU1VWGk2kR0k+ffMSkIgREc+jGBX/1Upywq2qWK3eyvk6p0h2ynSMdTnxi4c4nJj/4Yp7MGqx/vqjhQmsX/0AGNHSQ49emQOWkCl3AjElmWUJga6vOcXjfugTI0lc816GdufEcKtbTXbOywm86VeLDznwrAcPL+zgZ+HGVjnyb0bGFdJ7B+eLG0pQdut9kxuJKnQH1fstthkBzBA3wJNaoBd0zAH1bgA8cSuXdKaLsn12XfQa05OuLNBaP0Clrdvk7CgPEz7sGqyQxj+tg3QPOTIfQe570UCRo3W7WlMqcRn9PKQV++U=
-
-    bucket: "studio-link-artifacts"
-    region: eu-central-1
-    local_dir: build/s3_upload
-    acl: public_read
-    skip_cleanup: true
-    on:
-      all_branches: true
-      condition: $BUILD_OS != ccheck
 
 env:
   matrix:
