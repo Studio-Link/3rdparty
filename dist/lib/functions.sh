@@ -5,6 +5,9 @@ sl_prepare_version() {
 }
 
 sl_prepare() {
+    if [ -z $BUILD_OS ]; then
+        export BUILD_OS="$TRAVIS_OS_NAME"
+    fi
     echo "start build on $TRAVIS_OS_NAME ($BUILD_OS)"
     sed_opt="-i"
 

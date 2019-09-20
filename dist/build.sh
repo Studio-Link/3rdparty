@@ -97,8 +97,4 @@ fi
 
 # Testing and prepare release upload
 #-----------------------------------------------------------------------------
-
-s3_path="s3_upload/3rdparty/$version_t"
-mkdir -p $s3_path
 zip -r $BUILD_OS.zip my_include openssl opus
-cp $BUILD_OS.zip $s3_path
