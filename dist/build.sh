@@ -45,9 +45,13 @@ fi
 if [ ! -d rtaudio-${rtaudio} ]; then
     sl_get_rtaudio
     pushd rtaudio-${rtaudio}
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    if [ "$BUILD_OS" == "linux" ]; then
         ./autogen.sh --with-alsa --with-pulse
-    else
+    fi
+    if [ "$BUILD_OS" == "linuxjack" ]; then
+        ./autogen.sh --with-alsa --with-pulse --with-jack
+    fi
+    if [ "$BUILD_OS" == "osx" ]; then
         export CXXFLAGS="-Wno-deprecated -DUNICODE"
         sudo mkdir -p /usr/local/Library/ENV/4.3
         sudo ln -s $(which sed) /usr/local/Library/ENV/4.3/sed
