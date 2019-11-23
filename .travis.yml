@@ -40,7 +40,7 @@ matrix:
     env: BUILD_OS="linuxjack"
   - os: linux
     env: BUILD_OS="osx"
-arch:
+archlinux:
   packages:
   - wget
   - perl
