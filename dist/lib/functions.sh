@@ -27,6 +27,11 @@ sl_get_openssl() {
         ${SHASUM} -a 256 -c -
     tar -xzf openssl-${openssl}.tar.gz
     ln -s openssl-${openssl} openssl
+    pushd openssl
+    # fix/patch openssl 1.1.1d bug
+    wget https://github.com/openssl/openssl/commit/c3656cc594daac8167721dde7220f0e59ae146fc.diff
+    patch --ignore-whitespace -p1 < c3656cc594daac8167721dde7220f0e59ae146fc.diff
+    popd
 }
 
 sl_get_flac() {
