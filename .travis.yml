@@ -24,14 +24,11 @@ deploy:
 env:
   matrix:
   - BUILD_OS="windows64"
-  - BUILD_OS="windows32"
   - BUILD_OS="linux"
   - BUILD_OS="linuxjack"
   - BUILD_OS="osx"
 matrix:
   exclude:
-  - os: osx
-    env: BUILD_OS="windows32"
   - os: osx
     env: BUILD_OS="windows64"
   - os: osx
