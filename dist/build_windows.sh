@@ -57,7 +57,7 @@ if [ ! -d rtaudio-${rtaudio} ]; then
     sl_get_rtaudio
     pushd rtaudio-${rtaudio}
     export CPPFLAGS="-Wno-unused-function -Wno-unused-but-set-variable"
-    ./autogen.sh --with-wasapi --with-asio --host=${_arch}
+    ./autogen.sh --with-wasapi --with-asio --with-ds --host=${_arch}
     make $make_opts
     unset CPPFLAGS
     cp -a .libs/librtaudio.a ../my_include/
