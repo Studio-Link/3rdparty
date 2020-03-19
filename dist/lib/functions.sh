@@ -29,8 +29,8 @@ sl_get_openssl() {
     ln -s openssl-${openssl} openssl
     pushd openssl
     # fix/patch openssl 1.1.1d bug
-    wget https://github.com/openssl/openssl/commit/c3656cc594daac8167721dde7220f0e59ae146fc.diff
-    patch --ignore-whitespace -p1 < c3656cc594daac8167721dde7220f0e59ae146fc.diff
+    #wget https://github.com/openssl/openssl/commit/c3656cc594daac8167721dde7220f0e59ae146fc.diff
+    #patch --ignore-whitespace -p1 < c3656cc594daac8167721dde7220f0e59ae146fc.diff
     popd
 }
 
