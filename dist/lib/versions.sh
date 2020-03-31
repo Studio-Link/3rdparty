@@ -1,6 +1,6 @@
 github_org="https://github.com/Studio-Link"
 opus="1.3.1"
-openssl="1.1.1e"
-openssl_sha256="694f61ac11cb51c9bf73f54e771ff6022b0327a43bbdfa1b2f19de1662a6dcbe"
+openssl="1.1.1f"
+openssl_sha256="186c6bfe6ecfba7a5b48c47f8a1673d0f3b0e5ba2e25602dd23b629975da3f35"
 rtaudio="master"
 flac="1.3.3"
