@@ -48,5 +48,6 @@ archlinux:
   - unzip
   - vim
   - npm
+  - cmake
   script:
   - "./dist/build_windows.sh"
