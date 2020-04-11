@@ -1,7 +1,8 @@
 #!/bin/bash -ex
 
 #sudo cp -a /build /build2
-sudo ls -lha
+cd /home/travis
+ls -lha
 export PATH="$PATH:/usr/bin/core_perl"
 
 source dist/lib/versions.sh
