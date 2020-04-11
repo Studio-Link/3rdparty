@@ -27,6 +27,8 @@ else
     sed_opt="-i ''"
 fi
 
+
+
 # Build libsamplerate
 #-----------------------------------------------------------------------------
 if [ ! -d libsamplerate ]; then
@@ -37,6 +39,29 @@ if [ ! -d libsamplerate ]; then
     make
     cp -a ./src/.libs/libsamplerate.a ../my_include/
     cp -a ./src/samplerate.h ../my_include/
+    popd
+fi
+
+# Build soundio
+#-----------------------------------------------------------------------------
+if [ ! -d soundio ]; then
+    sl_get_soundio
+    pushd soundio
+    mkdir build
+    pushd build
+    if [ "$BUILD_OS" == "linux" ]; then
+        cmake -D CMAKE_BUILD_TYPE=Release -D ENABLE_JACK=OFF ..
+    fi
+    if [ "$BUILD_OS" == "linuxjack" ]; then
+        cmake -D CMAKE_BUILD_TYPE=Release ..
+    fi
+    if [ "$BUILD_OS" == "osx" ]; then
+        cmake -D CMAKE_BUILD_TYPE=Release ..
+    fi
+    make
+    popd
+
+    cp -a build/libsoundio.a ../my_include/
     popd
 fi
 

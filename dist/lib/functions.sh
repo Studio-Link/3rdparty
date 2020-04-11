@@ -53,3 +53,11 @@ sl_get_rtaudio() {
     cp -a rtaudio-${rtaudio}/rtaudio_c.h my_include/
     rm -f ${rtaudio}.tar.gz
 }
+
+sl_get_soundio() {
+    wget https://github.com/studio-link-3rdparty/libsoundio/archive/master.tar.gz -O soundio.tar.gz 
+    tar -xzf soundio.tar.gz
+    ln -s libsoundio-master soundio
+    cp -a libsoundio-master/soundio my_include/
+    rm soundio.tar.gz
+}
