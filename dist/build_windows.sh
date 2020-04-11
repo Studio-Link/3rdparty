@@ -1,5 +1,6 @@
 #!/bin/bash -ex
 
+sudo ls -lha
 export PATH="$PATH:/usr/bin/core_perl"
 
 source dist/lib/versions.sh
