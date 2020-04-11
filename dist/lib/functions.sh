@@ -59,5 +59,6 @@ sl_get_soundio() {
     tar -xzf soundio.tar.gz
     ln -s libsoundio-master soundio
     cp -a libsoundio-master/soundio my_include/
+    cp -a dist/windows/soundio/toolchain.cmake soundio/
     rm soundio.tar.gz
 }
