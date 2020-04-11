@@ -6,8 +6,6 @@ source dist/lib/functions.sh
 make_opts="-j4"
 
 if [ "$BUILD_OS" == "windows32" ] || [ "$BUILD_OS" == "windows64" ]; then
-    ls -lha
-    id
     curl -s https://raw.githubusercontent.com/studio-link-3rdparty/arch-travis/master/arch-travis.sh | bash
     exit 0
 fi
