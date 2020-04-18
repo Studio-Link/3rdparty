@@ -50,13 +50,13 @@ if [ ! -d soundio ]; then
     mkdir build
     pushd build
     if [ "$BUILD_OS" == "linux" ]; then
-        cmake -D CMAKE_BUILD_TYPE=Release -D ENABLE_JACK=OFF ..
+        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release -D ENABLE_JACK=OFF ..
     fi
     if [ "$BUILD_OS" == "linuxjack" ]; then
-        cmake -D CMAKE_BUILD_TYPE=Release ..
+        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
     fi
     if [ "$BUILD_OS" == "osx" ]; then
-        cmake -D CMAKE_BUILD_TYPE=Release ..
+        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
     fi
     make
     popd

@@ -54,10 +54,10 @@ if [ ! -d soundio ]; then
     mkdir build
     pushd build
     if [ "$BUILD_OS" == "windows32" ]; then
-        export MINGW_ARCH=32; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
+        export MINGW_ARCH=32; cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
     fi
     if [ "$BUILD_OS" == "windows64" ]; then
-        export MINGW_ARCH=64; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
+        export MINGW_ARCH=64; cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
     fi
     make
     popd
