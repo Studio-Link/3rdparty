@@ -63,9 +63,10 @@ sl_get_soundio() {
     pushd libsoundio-master
     if [ "$BUILD_OS" == "osx" ]; then
         patch --ignore-whitespace -p1 < ../master...coreaudio_patches.diff
+    else
+        patch --ignore-whitespace -p1 < ../master...wasapi_patches.diff
+        patch --ignore-whitespace -p1 < ../master...pulseaudio_patches.diff
     fi
-    patch --ignore-whitespace -p1 < ../master...wasapi_patches.diff
-    patch --ignore-whitespace -p1 < ../master...pulseaudio_patches.diff
     popd
     ln -s libsoundio-master soundio
     cp -a libsoundio-master/soundio my_include/
