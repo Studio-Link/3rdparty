@@ -59,7 +59,11 @@ sl_get_soundio() {
     tar -xzf soundio.tar.gz
     wget https://github.com/studio-link-3rdparty/libsoundio/compare/master...wasapi_patches.diff
     wget https://github.com/studio-link-3rdparty/libsoundio/compare/master...pulseaudio_patches.diff
+    wget https://github.com/studio-link-3rdparty/libsoundio/compare/master...coreaudio_patches.diff
     pushd libsoundio-master
+    if [ "$BUILD_OS" == "osx" ]; then
+        patch --ignore-whitespace -p1 < ../master...coreaudio_patches.diff
+    fi
     patch --ignore-whitespace -p1 < ../master...wasapi_patches.diff
     patch --ignore-whitespace -p1 < ../master...pulseaudio_patches.diff
     popd
