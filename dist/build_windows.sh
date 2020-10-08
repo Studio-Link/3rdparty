@@ -124,4 +124,4 @@ make openssl
 
 # Package
 #-----------------------------------------------------------------------------
-zip -r $BUILD_OS.zip my_include openssl opus
+zip -r $BUILD_OS.zip my_include openssl opus libsoundio-master
