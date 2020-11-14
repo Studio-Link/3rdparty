@@ -25,6 +25,7 @@ fi
 if [ "$BUILD_TARGET" == "macos_arm64" ]; then
     xcode="/Applications/Xcode_12.2.app/Contents/Developer"
     sysroot="$xcode/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    sudo xcode-select --switch $xcode
     export CFLAGS="$CFLAGS -arch arm64 -isysroot $sysroot"
     export CXXFLAGS="$CXXFLAGS -arch arm64 -isysroot $sysroot"
 fi
@@ -36,7 +37,7 @@ if [ ! -d libsamplerate ]; then
     pushd libsamplerate
     mkdir build
     pushd build
-    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+    if [ "$BUILD_TARGET" == "macos_arm64_disabled" ]; then
         cmake -DCMAKE_OSX_ARCHITECTURES=arm64 ..
     else
         cmake ..
