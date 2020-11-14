@@ -23,8 +23,7 @@ else
 fi
 
 if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-    #sudo xcode-select --switch /Applications/Xcode_12.2.app/Contents/Developer
-    export CFLAGS="$CFLAGS -arch arm64"
+    export CFLAGS="$CFLAGS -arch arm64 -isysroot /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
     export CXXFLAGS="$CXXFLAGS -arch arm64"
 fi
 
