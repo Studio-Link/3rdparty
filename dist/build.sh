@@ -26,8 +26,8 @@ if [ "$BUILD_TARGET" == "macos_arm64" ]; then
     xcode="/Applications/Xcode_12.2.app/Contents/Developer"
     sysroot="$xcode/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
     sudo xcode-select --switch $xcode
-    export CFLAGS="$CFLAGS -arch arm64 -isysroot $sysroot"
-    export CXXFLAGS="$CXXFLAGS -arch arm64 -isysroot $sysroot"
+    BUILD_CFLAGS="$CFLAGS -arch arm64 -isysroot $sysroot"
+    BUILD_CXXFLAGS="$CXXFLAGS -arch arm64 -isysroot $sysroot"
 fi
 
 # Build libsamplerate
@@ -41,7 +41,11 @@ if [ "$BUILD_TARGET" == "macos_arm64" ]; then
 else
     ./configure
 fi
+    export CFLAGS=$BUILD_CFLAGS
+    export CXXFLAGS=$BUILD_CXXFLAGS
     make
+    unset CFLAGS
+    unset CXXFLAGS
     cp -a ./src/.libs/libsamplerate.a ../my_include/
     cp -a ./src/samplerate.h ../my_include/
     popd
