@@ -34,7 +34,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: setup build
+    - name: setup build linux
       if: ${{ matrix.os_name == 'linux' }}
       run: |
         sudo apt-get install -y libasound2-dev \
@@ -42,6 +42,11 @@ jobs:
                                 libpulse-dev \
                                 libpulse0 \
                                 vim-common
+                                
+    - name: setup build macos
+      if: ${{ matrix.os_name == 'macos' }}
+      run: brew install automake
+
     - name: build
       if: ${{ matrix.os_name == 'linux' || matrix.os_name == 'macos' }}
       run: ./dist/build.sh
