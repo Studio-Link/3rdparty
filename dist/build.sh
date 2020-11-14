@@ -115,7 +115,7 @@ if [ ! -d opus-$opus ]; then
     tar -xzf opus-${opus}.tar.gz
     pushd opus-$opus
     if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-        ./configure --with-pic --host arm64-apple-darwin
+        ./configure --with-pic --host arm-apple-darwin
     else
         ./configure --with-pic
     fi
