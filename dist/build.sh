@@ -26,8 +26,8 @@ if [ "$BUILD_TARGET" == "macos_arm64" ]; then
     xcode="/Applications/Xcode_12.2.app/Contents/Developer"
     sysroot="$xcode/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
     sudo xcode-select --switch $xcode
-    BUILD_CFLAGS="$CFLAGS -arch arm64 -isysroot $sysroot -host arm64"
-    BUILD_CXXFLAGS="$CXXFLAGS -arch arm64 -isysroot $sysroot -host arm64"
+    BUILD_CFLAGS="$CFLAGS -arch arm64 -isysroot $sysroot -host arm64-apple-darwin"
+    BUILD_CXXFLAGS="$CXXFLAGS -arch arm64 -isysroot $sysroot -host arm64-apple-darwin"
 fi
 
 # Build libsamplerate
