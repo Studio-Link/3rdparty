@@ -22,9 +22,23 @@ else
     sed_opt="-i ''"
 fi
 
-if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+if [ "$BUILD_TARGET" == "macos_arm64_DISABLED" ]; then
     export CFLAGS="$CFLAGS -arch arm64"
     export CXXFLAGS="$CXXFLAGS -arch arm64"
+fi
+
+# Build openssl
+#-----------------------------------------------------------------------------
+if [ ! -d openssl-${openssl} ]; then
+    sl_get_openssl
+    cd openssl
+if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+    ./Configure darwin64-arm64-cc
+fi
+    ./config no-shared
+    make $make_opts build_libs
+    cp -a include/openssl ../my_include/
+    cd ..
 fi
 
 # Build libsamplerate
@@ -83,19 +97,6 @@ if [ ! -d flac-${flac} ]; then
     cd ..
 fi
 
-# Build openssl
-#-----------------------------------------------------------------------------
-if [ ! -d openssl-${openssl} ]; then
-    sl_get_openssl
-    cd openssl
-if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-    ./Configure darwin64-arm64-cc
-fi
-    ./config no-shared
-    make $make_opts build_libs
-    cp -a include/openssl ../my_include/
-    cd ..
-fi
 
 # Build opus
 #-----------------------------------------------------------------------------
