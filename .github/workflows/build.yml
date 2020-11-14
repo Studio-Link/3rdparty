@@ -43,5 +43,5 @@ jobs:
                                 libpulse0 \
                                 vim-common
     - name: build
-      if: ${{ matrix.os_name == 'linux' }}
+      if: ${{ matrix.os_name == 'linux' || matrix.os_name == 'macos' }}
       run: ./dist/build.sh
