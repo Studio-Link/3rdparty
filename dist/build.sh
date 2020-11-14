@@ -50,7 +50,7 @@ if [ ! -d libsamplerate ]; then
     pushd libsamplerate
     mkdir build
     pushd build
-    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+    if [ "$BUILD_TARGET" == "macos_arm64_disabled" ]; then
         cmake -DCMAKE_OSX_ARCHITECTURES=arm64 ..
     else
         cmake ..
