@@ -38,11 +38,11 @@ if [ ! -d libsamplerate ]; then
     git clone https://github.com/studio-link-3rdparty/libsamplerate.git
     pushd libsamplerate
     ./autogen.sh
-if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-    ./configure --host arm64-apple-darwin
-else
-    ./configure
-fi
+    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+        ./configure --host arm64-apple-darwin
+    else
+        ./configure
+    fi
     make
 
     cp -a ./src/.libs/libsamplerate.a ../my_include/
@@ -55,12 +55,12 @@ fi
 if [ ! -d openssl-${openssl} ]; then
     sl_get_openssl
     cd openssl
-if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-    cp -a ../../dist/patches/openssl-10-main.conf Configurations/10-main.conf
-    ./Configure no-shared darwin64-arm64-cc no-asm
-else
-    ./config no-shared
-fi
+    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+        cp -a ../../dist/patches/openssl-10-main.conf Configurations/10-main.conf
+        ./Configure no-shared darwin64-arm64-cc no-asm
+    else
+        ./config no-shared
+    fi
     make $make_opts build_libs
     cp -a include/openssl ../my_include/
     cd ..
@@ -95,7 +95,11 @@ if [ ! -d flac-${flac} ]; then
     sl_get_flac
 
     cd flac
-    ./configure --disable-ogg --enable-static
+    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+        ./configure --disable-ogg --enable-static --host arm64-apple-darwin
+    else
+        ./configure --disable-ogg --enable-static
+    fi
     make $make_opts
     cp -a include/FLAC ../my_include/
     cp -a include/share ../my_include/
@@ -109,7 +113,14 @@ fi
 if [ ! -d opus-$opus ]; then
     wget "https://archive.mozilla.org/pub/opus/opus-${opus}.tar.gz"
     tar -xzf opus-${opus}.tar.gz
-    cd opus-$opus; ./configure --with-pic; make; cd ..
+    pushd opus-$opus
+    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+        ./configure --with-pic --host arm64-apple-darwin
+    else
+        ./configure --with-pic
+    fi
+    make
+    popd
     mkdir opus; cp opus-$opus/.libs/libopus.a opus/
     mkdir -p my_include/opus
     cp opus-$opus/include/*.h my_include/opus/ 
