@@ -55,5 +55,5 @@ jobs:
     - name: Upload workflow artifact
       uses: actions/upload-artifact@v2
       with:
-        name: Upload
-        path: *.zip
+        name: ${{ matrix.target }}
+        path: "*.zip"
