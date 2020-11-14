@@ -50,6 +50,4 @@ jobs:
 
     - name: build
       if: ${{ matrix.os_name == 'linux' || matrix.os_name == 'macos' }}
-      run: |
-        ls -lha /Applications
-        ./dist/build.sh
+      run: ./dist/build.sh

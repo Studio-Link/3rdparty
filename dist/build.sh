@@ -33,7 +33,7 @@ if [ ! -d openssl-${openssl} ]; then
     sl_get_openssl
     cd openssl
 if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-    cp -a ../dist/patches/openssl-10-main.conf Configurations/10-main.conf
+    cp -a ../../dist/patches/openssl-10-main.conf Configurations/10-main.conf
     ./Configure no-shared darwin64-arm64-cc no-asm
 else
     ./config no-shared
