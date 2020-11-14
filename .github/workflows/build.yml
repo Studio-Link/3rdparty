@@ -9,30 +9,21 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
-            env:
-              BUILD_TARGET: windows64
-              BUILD_OS: archlinux
-          - os: ubuntu-20.04
-            env:
-              BUILD_TARGET: windows32
-              BUILD_OS: archlinux
-          - os: ubuntu-16.04
-            env:
-              BUILD_TARGET: linux
-              BUILD_OS: linux
-          - os: ubuntu-16.04
-            env:
-              BUILD_TARGET: linuxjack
-              BUILD_OS: linux
-          - os: macos-10.15
-            env:
-              BUILD_TARGET: macos_x86_64
-              BUILD_OS: macos
-          - os: macos-10.15
-            env:
-              BUILD_TARGET: macos_arm64
-              BUILD_OS: macos
+          - target: windows64
+            os: ubuntu-20.04
+            os_name: archlinux
+          - target: linux
+            os: ubuntu-16.04
+            os_name: linux
+          - target: macos_x86_64
+            os: macos-10.15
+            os_name: macos
+          - target: macos_arm64
+            os: macos-10.15
+            os_name: macos
+    env:
+      BUILD_TARGET: ${{ matrix.target }}
+      BUILD_OS: ${{ matrix.os_name }}
 
     steps:
     - uses: actions/checkout@v2
