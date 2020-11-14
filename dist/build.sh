@@ -96,7 +96,7 @@ if [ ! -d flac-${flac} ]; then
 
     cd flac
     if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-        ./configure --disable-ogg --enable-static --host arm64-apple-darwin
+        ./configure --disable-ogg --enable-static --host arm-apple-darwin
     else
         ./configure --disable-ogg --enable-static
     fi
