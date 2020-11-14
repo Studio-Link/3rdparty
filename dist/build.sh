@@ -35,16 +35,10 @@ fi
 if [ ! -d libsamplerate ]; then
     git clone https://github.com/studio-link-3rdparty/libsamplerate.git
     pushd libsamplerate
-    mkdir build
-    pushd build
-    if [ "$BUILD_TARGET" == "macos_arm64_disabled" ]; then
-        cmake -DCMAKE_OSX_ARCHITECTURES=arm64 ..
-    else
-        cmake ..
-    fi
+    ./autogen.sh
+    ./configure
     make
-    cp -a libsamplerate.a ../../my_include/
-    popd
+    cp -a ./src/.libs/libsamplerate.a ../my_include/
     cp -a ./src/samplerate.h ../my_include/
     popd
 fi
