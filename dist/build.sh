@@ -37,7 +37,7 @@ if [ ! -d libsamplerate ]; then
     pushd libsamplerate
     ./autogen.sh
 if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-    ./configure --build=x86_64-apple-darwin
+    ./configure --build=x86_64-apple-darwin --target=arm64-apple-darwin
 else
     ./configure
 fi
