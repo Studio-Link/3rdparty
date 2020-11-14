@@ -32,10 +32,16 @@ fi
 if [ ! -d libsamplerate ]; then
     git clone https://github.com/studio-link-3rdparty/libsamplerate.git
     pushd libsamplerate
-    ./autogen.sh
-    ./configure
+    mkdir build
+    pushd build
+    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+        cmake -DCMAKE_OSX_ARCHITECTURES=arm64 ..
+    else
+        cmake ..
+    fi
     make
-    cp -a ./src/.libs/libsamplerate.a ../my_include/
+    cp -a libsamplerate.a ../my_include/
+    popd
     cp -a ./src/samplerate.h ../my_include/
     popd
 fi
@@ -83,7 +89,7 @@ if [ ! -d openssl-${openssl} ]; then
     sl_get_openssl
     cd openssl
 if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-    ./configure darwin64-arm64-cc
+    ./Configure darwin64-arm64-cc
 fi
     ./config no-shared
     make $make_opts build_libs
