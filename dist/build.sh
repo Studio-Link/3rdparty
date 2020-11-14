@@ -36,11 +36,7 @@ if [ ! -d libsamplerate ]; then
     git clone https://github.com/studio-link-3rdparty/libsamplerate.git
     pushd libsamplerate
     ./autogen.sh
-if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-    ./configure --build=x86_64-apple-darwin --target=arm64-apple-darwin
-else
     ./configure
-fi
     export CFLAGS=$BUILD_CFLAGS
     export CXXFLAGS=$BUILD_CXXFLAGS
     make
