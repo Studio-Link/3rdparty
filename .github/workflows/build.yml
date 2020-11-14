@@ -49,5 +49,5 @@ jobs:
       run: brew install automake
 
     - name: build
-      if: ${{ matrix.os_name == 'linux' || matrix.target == 'macos_x86_64' }}
+      if: ${{ matrix.os_name == 'linux' || matrix.os_name == 'macos' }}
       run: ./dist/build.sh

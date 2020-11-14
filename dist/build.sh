@@ -22,7 +22,10 @@ else
     sed_opt="-i ''"
 fi
 
-
+if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+    export CFLAGS="$CFLAGS -arch arm64"
+    export CXXFLAGS="$CXXFLAGS -arch arm64"
+fi
 
 # Build libsamplerate
 #-----------------------------------------------------------------------------
@@ -50,36 +53,13 @@ if [ ! -d soundio ]; then
     if [ "$BUILD_TARGET" == "linuxjack" ]; then
         cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
     fi
-    if [ "$BUILD_TARGET" == "macos_x86_64" ]; then
+    if [ "$BUILD_OS" == "macos" ]; then
         cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
     fi
     make
     popd
 
     cp -a build/libsoundio.a ../my_include/
-    popd
-fi
-
-# Build RtAudio
-#-----------------------------------------------------------------------------
-if [ ! -d rtaudio-${rtaudio} ]; then
-    sl_get_rtaudio
-    pushd rtaudio-${rtaudio}
-    if [ "$BUILD_TARGET" == "linux" ]; then
-        ./autogen.sh --with-alsa --with-pulse
-    fi
-    if [ "$BUILD_TARGET" == "linuxjack" ]; then
-        ./autogen.sh --with-alsa --with-pulse --with-jack
-    fi
-    if [ "$BUILD_TARGET" == "macos_x86_64" ]; then
-        export CXXFLAGS="-Wno-deprecated -DUNICODE"
-        sudo mkdir -p /usr/local/Library/ENV/4.3
-        sudo ln -s $(which sed) /usr/local/Library/ENV/4.3/sed
-        ./autogen.sh --with-core
-    fi
-    make $make_opts
-    unset CXXFLAGS
-    cp -a .libs/librtaudio.a ../my_include/
     popd
 fi
 
@@ -102,6 +82,9 @@ fi
 if [ ! -d openssl-${openssl} ]; then
     sl_get_openssl
     cd openssl
+if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+    ./configure darwin64-arm64-cc
+fi
     ./config no-shared
     make $make_opts build_libs
     cp -a include/openssl ../my_include/
