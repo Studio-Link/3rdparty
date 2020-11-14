@@ -5,10 +5,7 @@ sl_prepare_version() {
 }
 
 sl_prepare() {
-    if [ -z $BUILD_OS ]; then
-        export BUILD_OS="$TRAVIS_OS_NAME"
-    fi
-    echo "start build on $TRAVIS_OS_NAME ($BUILD_OS)"
+    echo "start build on $BUILD_TARGET ($BUILD_OS)"
     sed_opt="-i"
 
     sl_prepare_version
@@ -16,7 +13,6 @@ sl_prepare() {
     mkdir -p build;
     pushd build
     mkdir -p my_include
-
 
     SHASUM=$(which shasum)
 }
@@ -61,7 +57,7 @@ sl_get_soundio() {
     wget https://github.com/studio-link-3rdparty/libsoundio/compare/master...pulseaudio_patches.diff
     wget https://github.com/studio-link-3rdparty/libsoundio/compare/master...coreaudio_patches.diff
     pushd libsoundio-master
-    if [ "$BUILD_OS" == "osx" ]; then
+    if [ "$BUILD_OS" == "macos" ]; then
         patch --ignore-whitespace -p1 < ../master...coreaudio_patches.diff
     else
         patch --ignore-whitespace -p1 < ../master...wasapi_patches.diff

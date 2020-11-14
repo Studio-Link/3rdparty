@@ -5,18 +5,13 @@ source dist/lib/functions.sh
 
 make_opts="-j4"
 
-if [ "$BUILD_OS" == "windows32" ] || [ "$BUILD_OS" == "windows64" ]; then
-    curl -s https://raw.githubusercontent.com/studio-link-3rdparty/arch-travis/master/arch-travis.sh | bash
-    exit 0
-fi
-
 # Start build
 #-----------------------------------------------------------------------------
 sl_prepare
 
 sl_extra_lflags="-L ../opus -L ../my_include "
 
-if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+if [ "$BUILD_OS" == "linux" ]; then
     sl_extra_modules="alsa slrtaudio"
 else
     export MACOSX_DEPLOYMENT_TARGET=10.9
@@ -49,13 +44,13 @@ if [ ! -d soundio ]; then
     pushd soundio
     mkdir build
     pushd build
-    if [ "$BUILD_OS" == "linux" ]; then
+    if [ "$BUILD_TARGET" == "linux" ]; then
         cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release -D ENABLE_JACK=OFF ..
     fi
-    if [ "$BUILD_OS" == "linuxjack" ]; then
+    if [ "$BUILD_TARGET" == "linuxjack" ]; then
         cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
     fi
-    if [ "$BUILD_OS" == "osx" ]; then
+    if [ "$BUILD_TARGET" == "macos_x86_64" ]; then
         cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
     fi
     make
@@ -70,13 +65,13 @@ fi
 if [ ! -d rtaudio-${rtaudio} ]; then
     sl_get_rtaudio
     pushd rtaudio-${rtaudio}
-    if [ "$BUILD_OS" == "linux" ]; then
+    if [ "$BUILD_TARGET" == "linux" ]; then
         ./autogen.sh --with-alsa --with-pulse
     fi
-    if [ "$BUILD_OS" == "linuxjack" ]; then
+    if [ "$BUILD_TARGET" == "linuxjack" ]; then
         ./autogen.sh --with-alsa --with-pulse --with-jack
     fi
-    if [ "$BUILD_OS" == "osx" ]; then
+    if [ "$BUILD_TARGET" == "macos_x86_64" ]; then
         export CXXFLAGS="-Wno-deprecated -DUNICODE"
         sudo mkdir -p /usr/local/Library/ENV/4.3
         sudo ln -s $(which sed) /usr/local/Library/ENV/4.3/sed
@@ -126,4 +121,4 @@ fi
 
 # Testing and prepare release upload
 #-----------------------------------------------------------------------------
-zip -r $BUILD_OS.zip my_include openssl opus
+zip -r $BUILD_TARGET.zip my_include openssl opus
