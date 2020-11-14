@@ -51,3 +51,9 @@ jobs:
     - name: build
       if: ${{ matrix.os_name == 'linux' || matrix.os_name == 'macos' }}
       run: ./dist/build.sh
+
+    - name: Upload workflow artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: {{ matrix.target }}
+        path: *.zip
