@@ -12,7 +12,13 @@ jobs:
           - target: windows64
             os: ubuntu-20.04
             os_name: archlinux
+          - target: windows32
+            os: ubuntu-20.04
+            os_name: archlinux
           - target: linux
+            os: ubuntu-16.04
+            os_name: linux
+          - target: linuxjack
             os: ubuntu-16.04
             os_name: linux
           - target: macos_x86_64
@@ -27,5 +33,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: make ${{ matrix.target }}
-      run: echo $BUILD_OS $BUILD_TARGET
+
+    - name: setup build
+      if: {{ matrix.os_name == linux }}
+      run: |
+        sudo apt-get install -y libasound2-dev \
+                                libjack-jackd2-dev \
+                                libpulse-dev \
+                                libpulse0 \
+                                vim-common
+    - name: build
+      run: ./build.sh
