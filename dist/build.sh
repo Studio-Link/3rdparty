@@ -33,9 +33,10 @@ if [ ! -d openssl-${openssl} ]; then
     sl_get_openssl
     cd openssl
 if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-    ./Configure darwin64-arm64-cc
-fi
+    ./Configure no-shared darwin64-arm64-cc no-asm
+else
     ./config no-shared
+fi
     make $make_opts build_libs
     cp -a include/openssl ../my_include/
     cd ..
