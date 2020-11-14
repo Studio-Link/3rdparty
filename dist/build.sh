@@ -26,8 +26,10 @@ if [ "$BUILD_TARGET" == "macos_arm64" ]; then
     xcode="/Applications/Xcode_12.2.app/Contents/Developer"
     sysroot="$xcode/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
     sudo xcode-select --switch $xcode
-    BUILD_CFLAGS="$CFLAGS -arch arm64 -isysroot $sysroot -host arm64-apple-darwin"
-    BUILD_CXXFLAGS="$CXXFLAGS -arch arm64 -isysroot $sysroot -host arm64-apple-darwin"
+    BUILD_CFLAGS="$CFLAGS -arch arm64 -isysroot $sysroot"
+    BUILD_CXXFLAGS="$CXXFLAGS -arch arm64 -isysroot $sysroot"
+    export CFLAGS=$BUILD_CFLAGS
+    export CXXFLAGS=$BUILD_CXXFLAGS
 fi
 
 # Build libsamplerate
@@ -36,9 +38,11 @@ if [ ! -d libsamplerate ]; then
     git clone https://github.com/studio-link-3rdparty/libsamplerate.git
     pushd libsamplerate
     ./autogen.sh
-    export CFLAGS=$BUILD_CFLAGS
-    export CXXFLAGS=$BUILD_CXXFLAGS
+if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+    ./configure --host arm64-apple-darwin
+else
     ./configure
+fi
     make
 
     cp -a ./src/.libs/libsamplerate.a ../my_include/
