@@ -8,22 +8,22 @@ jobs:
 
     strategy:
       matrix:
-	include:
-	  - os: ubuntu-20.04
-	    env:
-	      BUILD_OS: windows64
-	  - os: ubuntu-20.04
-	    env:
-	      BUILD_OS: windows32
-	  - os: ubuntu-16.04
-	    env:
-	      BUILD_OS: linux
-	  - os: ubuntu-16.04
-	    env:
-	      BUILD_OS: linuxjack
-	  - os: macos-10.15
-	    env:
-	      BUILD_OS: osx
+        include:
+          - os: ubuntu-20.04
+            env:
+              BUILD_OS: windows64
+          - os: ubuntu-20.04
+            env:
+              BUILD_OS: windows32
+          - os: ubuntu-16.04
+            env:
+              BUILD_OS: linux
+          - os: ubuntu-16.04
+            env:
+              BUILD_OS: linuxjack
+          - os: macos-10.15
+            env:
+              BUILD_OS: osx
 
     steps:
     - uses: actions/checkout@v2
