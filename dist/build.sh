@@ -40,7 +40,7 @@ if [ ! -d libsamplerate ]; then
         cmake ..
     fi
     make
-    cp -a libsamplerate.a ../my_include/
+    cp -a libsamplerate.a ../../my_include/
     popd
     cp -a ./src/samplerate.h ../my_include/
     popd
