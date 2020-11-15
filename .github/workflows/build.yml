@@ -53,10 +53,9 @@ jobs:
       run: ./dist/build.sh
 
     - name: Upload release
-      uses: softprops/action-gh-release@v1
+      uses: sreimers/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/v')
       with:
         files: build/${{ matrix.target }}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
