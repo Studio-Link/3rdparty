@@ -5,18 +5,13 @@ source dist/lib/functions.sh
 
 make_opts="-j4"
 
-if [ "$BUILD_OS" == "windows32" ] || [ "$BUILD_OS" == "windows64" ]; then
-    curl -s https://raw.githubusercontent.com/studio-link-3rdparty/arch-travis/master/arch-travis.sh | bash
-    exit 0
-fi
-
 # Start build
 #-----------------------------------------------------------------------------
 sl_prepare
 
 sl_extra_lflags="-L ../opus -L ../my_include "
 
-if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+if [ "$BUILD_OS" == "linux" ]; then
     sl_extra_modules="alsa slrtaudio"
 else
     export MACOSX_DEPLOYMENT_TARGET=10.9
@@ -27,7 +22,15 @@ else
     sed_opt="-i ''"
 fi
 
-
+if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+    xcode="/Applications/Xcode_12.2.app/Contents/Developer"
+    sysroot="$xcode/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    sudo xcode-select --switch $xcode
+    BUILD_CFLAGS="$CFLAGS -arch arm64 -isysroot $sysroot"
+    BUILD_CXXFLAGS="$CXXFLAGS -arch arm64 -isysroot $sysroot"
+    export CFLAGS=$BUILD_CFLAGS
+    export CXXFLAGS=$BUILD_CXXFLAGS
+fi
 
 # Build libsamplerate
 #-----------------------------------------------------------------------------
@@ -35,11 +38,32 @@ if [ ! -d libsamplerate ]; then
     git clone https://github.com/studio-link-3rdparty/libsamplerate.git
     pushd libsamplerate
     ./autogen.sh
-    ./configure
+    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+        ./configure --host arm64-apple-darwin
+    else
+        ./configure
+    fi
     make
+
     cp -a ./src/.libs/libsamplerate.a ../my_include/
     cp -a ./src/samplerate.h ../my_include/
     popd
+fi
+
+# Build openssl
+#-----------------------------------------------------------------------------
+if [ ! -d openssl-${openssl} ]; then
+    sl_get_openssl
+    cd openssl
+    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+        cp -a ../../dist/patches/openssl-10-main.conf Configurations/10-main.conf
+        ./Configure no-shared darwin64-arm64-cc no-asm
+    else
+        ./config no-shared
+    fi
+    make $make_opts build_libs
+    cp -a include/openssl ../my_include/
+    cd ..
 fi
 
 # Build soundio
@@ -49,13 +73,13 @@ if [ ! -d soundio ]; then
     pushd soundio
     mkdir build
     pushd build
-    if [ "$BUILD_OS" == "linux" ]; then
+    if [ "$BUILD_TARGET" == "linux" ]; then
         cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release -D ENABLE_JACK=OFF ..
     fi
-    if [ "$BUILD_OS" == "linuxjack" ]; then
+    if [ "$BUILD_TARGET" == "linuxjack" ]; then
         cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
     fi
-    if [ "$BUILD_OS" == "osx" ]; then
+    if [ "$BUILD_OS" == "macos" ]; then
         cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
     fi
     make
@@ -65,36 +89,17 @@ if [ ! -d soundio ]; then
     popd
 fi
 
-# Build RtAudio
-#-----------------------------------------------------------------------------
-if [ ! -d rtaudio-${rtaudio} ]; then
-    sl_get_rtaudio
-    pushd rtaudio-${rtaudio}
-    if [ "$BUILD_OS" == "linux" ]; then
-        ./autogen.sh --with-alsa --with-pulse
-    fi
-    if [ "$BUILD_OS" == "linuxjack" ]; then
-        ./autogen.sh --with-alsa --with-pulse --with-jack
-    fi
-    if [ "$BUILD_OS" == "osx" ]; then
-        export CXXFLAGS="-Wno-deprecated -DUNICODE"
-        sudo mkdir -p /usr/local/Library/ENV/4.3
-        sudo ln -s $(which sed) /usr/local/Library/ENV/4.3/sed
-        ./autogen.sh --with-core
-    fi
-    make $make_opts
-    unset CXXFLAGS
-    cp -a .libs/librtaudio.a ../my_include/
-    popd
-fi
-
 # Build FLAC
 #-----------------------------------------------------------------------------
 if [ ! -d flac-${flac} ]; then
     sl_get_flac
 
     cd flac
-    ./configure --disable-ogg --enable-static
+    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+        ./configure --disable-ogg --enable-static --host arm-apple-darwin
+    else
+        ./configure --disable-ogg --enable-static
+    fi
     make $make_opts
     cp -a include/FLAC ../my_include/
     cp -a include/share ../my_include/
@@ -102,23 +107,20 @@ if [ ! -d flac-${flac} ]; then
     cd ..
 fi
 
-# Build openssl
-#-----------------------------------------------------------------------------
-if [ ! -d openssl-${openssl} ]; then
-    sl_get_openssl
-    cd openssl
-    ./config no-shared
-    make $make_opts build_libs
-    cp -a include/openssl ../my_include/
-    cd ..
-fi
 
 # Build opus
 #-----------------------------------------------------------------------------
 if [ ! -d opus-$opus ]; then
     wget "https://archive.mozilla.org/pub/opus/opus-${opus}.tar.gz"
     tar -xzf opus-${opus}.tar.gz
-    cd opus-$opus; ./configure --with-pic; make; cd ..
+    pushd opus-$opus
+    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+        ./configure --with-pic --host arm-apple-darwin
+    else
+        ./configure --with-pic
+    fi
+    make
+    popd
     mkdir opus; cp opus-$opus/.libs/libopus.a opus/
     mkdir -p my_include/opus
     cp opus-$opus/include/*.h my_include/opus/ 
@@ -126,4 +128,4 @@ fi
 
 # Testing and prepare release upload
 #-----------------------------------------------------------------------------
-zip -r $BUILD_OS.zip my_include openssl opus
+zip -r $BUILD_TARGET.zip my_include openssl opus

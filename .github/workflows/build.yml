@@ -1,0 +1,53 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: windows64
+            os: ubuntu-20.04
+            os_name: archlinux
+          - target: windows32
+            os: ubuntu-20.04
+            os_name: archlinux
+          - target: linux
+            os: ubuntu-16.04
+            os_name: linux
+          - target: linuxjack
+            os: ubuntu-16.04
+            os_name: linux
+          - target: macos_x86_64
+            os: macos-10.15
+            os_name: macos
+          - target: macos_arm64
+            os: macos-10.15
+            os_name: macos
+    env:
+      BUILD_TARGET: ${{ matrix.target }}
+      BUILD_OS: ${{ matrix.os_name }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: setup build linux
+      if: ${{ matrix.os_name == 'linux' }}
+      run: |
+        sudo apt-get install -y libasound2-dev \
+                                libjack-jackd2-dev \
+                                libpulse-dev \
+                                libpulse0 \
+                                vim-common
+
+    - name: setup build macos
+      if: ${{ matrix.os_name == 'macos' }}
+      run: brew install automake
+
+    - name: build
+      if: ${{ matrix.os_name == 'linux' || matrix.os_name == 'macos' }}
+      run: ./dist/build.sh
