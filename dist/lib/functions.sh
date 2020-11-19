@@ -12,7 +12,8 @@ sl_prepare() {
 
     mkdir -p build;
     pushd build
-    mkdir -p my_include
+    mkdir -p sl_include
+    mkdir -p sl_lib
 
     SHASUM=$(which shasum)
 }
@@ -36,20 +37,6 @@ sl_get_flac() {
     ln -s flac-${flac} flac
 }
 
-sl_get_rtaudio() {
-    wget https://github.com/Studio-Link/rtaudio/archive/${rtaudio}.tar.gz
-    tar -xzf ${rtaudio}.tar.gz
-    wget https://github.com/Studio-Link/rtaudio/compare/master...coreaudio.diff
-    #wget https://github.com/Studio-Link/rtaudio/compare/master...pulseaudio.diff
-    pushd rtaudio-${rtaudio}
-    #patch --ignore-whitespace -p1 < ../master...pulseaudio.diff
-    patch --ignore-whitespace -p1 < ../master...coreaudio.diff
-    popd
-    ln -s rtaudio-${rtaudio} rtaudio
-    cp -a rtaudio-${rtaudio}/rtaudio_c.h my_include/
-    rm -f ${rtaudio}.tar.gz
-}
-
 sl_get_soundio() {
     wget https://github.com/studio-link-3rdparty/libsoundio/archive/master.tar.gz -O soundio.tar.gz 
     tar -xzf soundio.tar.gz
@@ -65,7 +52,7 @@ sl_get_soundio() {
     fi
     popd
     ln -s libsoundio-master soundio
-    cp -a libsoundio-master/soundio my_include/
+    cp -a libsoundio-master/soundio sl_include/
     cp -a ../dist/windows/soundio/toolchain.cmake soundio/
     rm soundio.tar.gz
 }
