@@ -87,10 +87,10 @@ if [ ! -d soundio ]; then
     if [ "$BUILD_OS" == "macos" ]; then
         cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
     fi
-    if [ "$BUILD_OS" == "windows32" ]; then
+    if [ "$BUILD_TARGET" == "windows32" ]; then
         export MINGW_ARCH=32; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
     fi
-    if [ "$BUILD_OS" == "windows64" ]; then
+    if [ "$BUILD_TARGET" == "windows64" ]; then
         export MINGW_ARCH=64; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
     fi
     make
