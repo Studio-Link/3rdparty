@@ -61,9 +61,16 @@ if [ ! -d openssl-${openssl} ]; then
     if [ "$BUILD_TARGET" == "macos_arm64" ]; then
         cp -a ../../dist/patches/openssl-10-main.conf Configurations/10-main.conf
         ./Configure no-shared darwin64-arm64-cc no-asm
+    elif [ "$BUILD_TARGET" == "windows32" ]; then
+		CC=${_arch}-gcc RANLIB=${_arch}-ranlib AR=${_arch}-ar \
+		./Configure mingw no-shared no-threads
+    elif [ "$BUILD_TARGET" == "windows64" ]; then
+		CC=${_arch}-gcc RANLIB=${_arch}-ranlib AR=${_arch}-ar \
+		./Configure mingw64 no-shared no-threads
     else
         ./config no-shared
     fi
+    
     make $make_opts build_libs
     cp -a include/openssl ../sl_include/
     cp -a *.a ../sl_lib/
@@ -154,6 +161,6 @@ if [ ! -d opus-$opus ]; then
     cp opus-$opus/include/*.h sl_include/opus/ 
 fi
 
-# Testing and prepare release upload
+# Prepare release upload
 #-----------------------------------------------------------------------------
 zip -r $BUILD_TARGET.zip sl_lib sl_include
