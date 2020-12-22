@@ -10,8 +10,8 @@ sl_prepare() {
 
     mkdir -p build;
     pushd build
-    mkdir -p sl_include
-    mkdir -p sl_lib
+    mkdir -p 3rdparty/include
+    mkdir -p 3rdparty/lib
 
     SHASUM=$(which shasum)
 }
@@ -45,7 +45,7 @@ sl_get_soundio() {
     fi
     popd
     ln -s libsoundio-master soundio
-    cp -a libsoundio-master/soundio sl_include/
+    cp -a libsoundio-master/soundio 3rdparty/include/
     cp -a ../dist/windows/soundio/toolchain.cmake soundio/
     rm soundio.tar.gz
 }

@@ -48,8 +48,8 @@ if [ ! -d libsamplerate ]; then
     fi
     make
 
-    cp -a ./src/.libs/libsamplerate.a ../sl_lib/
-    cp -a ./src/samplerate.h ../sl_include/
+    cp -a ./src/.libs/libsamplerate.a ../3rdparty/lib/
+    cp -a ./src/samplerate.h ../3rdparty/include/
     popd
 fi
 
@@ -72,8 +72,8 @@ if [ ! -d openssl-${openssl} ]; then
     fi
     
     make $make_opts build_libs
-    cp -a include/openssl ../sl_include/
-    cp -a *.a ../sl_lib/
+    cp -a include/openssl ../3rdparty/include/
+    cp -a *.a ../3rdparty/lib/
 
     popd
 fi
@@ -103,7 +103,7 @@ if [ ! -d soundio ]; then
     make
     popd
 
-    cp -a build/libsoundio.a ../sl_lib/
+    cp -a build/libsoundio.a ../3rdparty/lib/
     popd
 fi
 
@@ -127,8 +127,8 @@ if [ ! -d flac-${flac} ]; then
         make $make_opts
     fi
 
-    cp -a include/FLAC ../sl_include/
-    cp -a src/libFLAC/.libs/libFLAC.a ../sl_lib/
+    cp -a include/FLAC ../3rdparty/include/
+    cp -a src/libFLAC/.libs/libFLAC.a ../3rdparty/lib/
     popd
 fi
 
@@ -156,11 +156,11 @@ if [ ! -d opus-$opus ]; then
         make
     fi
     popd
-    cp opus-$opus/.libs/libopus.a sl_lib/
-    mkdir -p sl_include/opus
-    cp opus-$opus/include/*.h sl_include/opus/ 
+    cp opus-$opus/.libs/libopus.a 3rdparty/lib/
+    mkdir -p 3rdparty/include/opus
+    cp opus-$opus/include/*.h 3rdparty/include/opus/
 fi
 
 # Prepare release upload
 #-----------------------------------------------------------------------------
-zip -r $BUILD_TARGET.zip sl_lib sl_include
+zip -r $BUILD_TARGET.zip 3rdparty
