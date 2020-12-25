@@ -62,8 +62,7 @@ if [ ! -d openssl-${openssl} ]; then
     sl_get_openssl
     pushd openssl
     if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-        cp -a ../../dist/patches/openssl-10-main.conf Configurations/10-main.conf
-        ./Configure no-shared darwin64-arm64-cc no-asm
+        ./Configure no-shared darwin64-arm64-cc
     elif [ "$BUILD_TARGET" == "windows32" ]; then
 		CC=${_arch}-gcc RANLIB=${_arch}-ranlib AR=${_arch}-ar \
 		./Configure mingw no-shared no-threads
