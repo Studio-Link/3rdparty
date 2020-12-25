@@ -35,6 +35,9 @@ if [ "$BUILD_OS" == "mingw" ]; then
     unset CXX
 fi
 
+# Disabled builds (debugging)
+#mkdir libsamplerate openssl-${openssl} soundio flac-${flac} opus-$opus
+
 # Build libsamplerate
 #-----------------------------------------------------------------------------
 if [ ! -d libsamplerate ]; then
@@ -116,7 +119,7 @@ if [ ! -d flac-${flac} ]; then
     if [ "$BUILD_TARGET" == "macos_arm64" ]; then
         ./configure --disable-ogg --enable-static --host arm-apple-darwin
         make $make_opts
-    elif ["$BUILD_OS" == "mingw"]; then
+    elif [ "$BUILD_OS" == "mingw" ]; then
         mkdir build_win
         pushd build_win
         ${_arch}-configure --disable-ogg --enable-static --disable-cpplibs
@@ -128,7 +131,13 @@ if [ ! -d flac-${flac} ]; then
     fi
 
     cp -a include/FLAC ../3rdparty/include/
-    cp -a src/libFLAC/.libs/libFLAC.a ../3rdparty/lib/
+
+    if [ "$BUILD_OS" == "mingw" ]; then
+        cp -a build_win/src/libFLAC/.libs/libFLAC.a ../3rdparty/lib/
+    else
+        cp -a src/libFLAC/.libs/libFLAC.a ../3rdparty/lib/
+    fi
+
     popd
 fi
 
@@ -142,7 +151,7 @@ if [ ! -d opus-$opus ]; then
     if [ "$BUILD_TARGET" == "macos_arm64" ]; then
         ./configure --with-pic --host arm-apple-darwin
         make
-    elif ["$BUILD_OS" == "mingw"]; then
+    elif [ "$BUILD_OS" == "mingw" ]; then
         mkdir build_win
         pushd build_win
         ${_arch}-configure \
@@ -156,9 +165,16 @@ if [ ! -d opus-$opus ]; then
         make
     fi
     popd
-    cp opus-$opus/.libs/libopus.a 3rdparty/lib/
+
+    if [ "$BUILD_OS" == "mingw" ]; then
+        cp opus-$opus/build_win/.libs/libopus.a 3rdparty/lib/
+    else
+        cp opus-$opus/.libs/libopus.a 3rdparty/lib/
+    fi
+
     mkdir -p 3rdparty/include/opus
     cp opus-$opus/include/*.h 3rdparty/include/opus/
+
 fi
 
 # Prepare release upload
