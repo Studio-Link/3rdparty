@@ -10,7 +10,7 @@ make_opts="-j4"
 sl_prepare
 
 if [ "$BUILD_OS" == "macos" ]; then
-    export MACOSX_DEPLOYMENT_TARGET=10.9
+    export MACOSX_DEPLOYMENT_TARGET=10.10
 fi
 
 if [ "$BUILD_TARGET" == "macos_arm64" ]; then
