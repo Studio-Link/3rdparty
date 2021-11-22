@@ -1,12 +1,11 @@
 SET(CMAKE_SYSTEM_NAME Linux)
-SET(CMAKE_SYSTEM_VERSION 1)
 
 # specify the cross compiler
-SET(CMAKE_C_COMPILER   /usr/bin/gcc-arm-linux-gnueabihf-gcc)
-SET(CMAKE_CXX_COMPILER /usr/bin/gcc-arm-linux-gnueabihf-g++)
+SET(CMAKE_C_COMPILER   /usr/bin/arm-linux-gnueabihf-gcc)
+SET(CMAKE_CXX_COMPILER /usr/bin/arm-linux-gnueabihf-g++)
 
 # where is the target environment
-SET(CMAKE_FIND_ROOT_PATH /usr/gcc-arm-linux-gnueabihf)
+SET(CMAKE_FIND_ROOT_PATH /usr/arm-linux-gnueabihf)
 
 # search for programs in the build host directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
