@@ -35,6 +35,14 @@ if [ "$BUILD_OS" == "mingw" ]; then
     unset CXX
 fi
 
+if [ "$BUILD_TARGET" == "linux_arm32" ]; then
+    _arch="arm-linux-gnueabihf"
+fi
+
+if [ "$BUILD_TARGET" == "linux_arm64" ]; then
+    _arch="aarch64-linux-gnu"
+fi
+
 # Disabled builds (debugging)
 #mkdir libsamplerate openssl-${openssl} soundio flac-${flac} opus-$opus
 
@@ -69,10 +77,16 @@ if [ ! -d openssl-${openssl} ]; then
     elif [ "$BUILD_TARGET" == "windows64" ]; then
 		CC=${_arch}-gcc RANLIB=${_arch}-ranlib AR=${_arch}-ar \
 		./Configure mingw64 no-shared no-threads
+    elif [ "$BUILD_TARGET" == "linux_arm32" ]; then
+		./Configure linux-generic32 no-shared no-threads \
+            --cross-compile-prefix=${_arch}-
+    elif [ "$BUILD_TARGET" == "linux_arm64" ]; then
+		./Configure linux-generic64 no-shared no-threads \
+            --cross-compile-prefix=${_arch}-
     else
         ./config no-shared
     fi
-    
+
     make $make_opts build_libs
     cp -a include/openssl ../3rdparty/include/
     cp -a *.a ../3rdparty/lib/
@@ -102,6 +116,12 @@ if [ ! -d soundio ]; then
     if [ "$BUILD_TARGET" == "windows64" ]; then
         export MINGW_ARCH=64; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
     fi
+    if [ "$BUILD_TARGET" == "linux_arm32" ]; then
+        cmake -D CMAKE_TOOLCHAIN_FILE=arm.cmake -D BUILD_TESTS=OFF ..
+    fi
+    if [ "$BUILD_TARGET" == "linux_arm64" ]; then
+        cmake -D CMAKE_TOOLCHAIN_FILE=aarch64.cmake -D BUILD_TESTS=OFF ..
+    fi
     make
     popd
 
@@ -124,6 +144,12 @@ if [ ! -d flac-${flac} ]; then
         ${_arch}-configure --disable-ogg --enable-static --disable-cpplibs
         make $make_opts
         popd
+    elif [ "$BUILD_TARGET" == "linux_arm32"]; then
+        ./configure --disable-ogg --enable-static --host ${_arch}
+        make $make_opts
+    elif [ "$BUILD_TARGET" == "linux_arm64"]; then
+        ./configure --disable-ogg --enable-static --host ${_arch}
+        make $make_opts
     else
         ./configure --disable-ogg --enable-static
         make $make_opts
@@ -159,6 +185,12 @@ if [ ! -d opus-$opus ]; then
             --disable-extra-programs
         make $make_opts
         popd
+    elif [ "$BUILD_TARGET" == "linux_arm32"]; then
+        ./configure --with-pic --host ${_arch}
+        make $make_opts
+    elif [ "$BUILD_TARGET" == "linux_arm64"]; then
+        ./configure --with-pic --host ${_arch}
+        make $make_opts
     else
         ./configure --with-pic
         make

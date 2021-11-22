@@ -28,6 +28,12 @@ jobs:
           - target: macos_arm64
             os: macos-10.15
             os_name: macos
+          - target: linux_arm32
+            os: ubuntu-20.04
+            os_name: linux
+          - target: linux_arm64
+            os: ubuntu-20.04
+            os_name: linux
     env:
       BUILD_TARGET: ${{ matrix.target }}
       BUILD_OS: ${{ matrix.os_name }}
@@ -42,7 +48,9 @@ jobs:
                                 libjack-jackd2-dev \
                                 libpulse-dev \
                                 libpulse0 \
-                                vim-common
+                                vim-common \
+                                gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+                                gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 
     - name: setup build macos
       if: ${{ matrix.os_name == 'macos' }}

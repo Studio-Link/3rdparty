@@ -31,7 +31,7 @@ sl_get_flac() {
 }
 
 sl_get_soundio() {
-    wget https://github.com/studio-link-3rdparty/libsoundio/archive/master.tar.gz -O soundio.tar.gz 
+    wget https://github.com/studio-link-3rdparty/libsoundio/archive/master.tar.gz -O soundio.tar.gz
     tar -xzf soundio.tar.gz
     wget https://github.com/studio-link-3rdparty/libsoundio/compare/master...wasapi_patches.diff
     wget https://github.com/studio-link-3rdparty/libsoundio/compare/master...pulseaudio_patches.diff
@@ -47,5 +47,7 @@ sl_get_soundio() {
     ln -s libsoundio-master soundio
     cp -a libsoundio-master/soundio 3rdparty/include/
     cp -a ../dist/windows/soundio/toolchain.cmake soundio/
+    cp -a ../dist/lib/arm.cmake soundio/
+    cp -a ../dist/lib/aarch64.cmake soundio/
     rm soundio.tar.gz
 }
