@@ -144,10 +144,10 @@ if [ ! -d flac-${flac} ]; then
         ${_arch}-configure --disable-ogg --enable-static --disable-cpplibs
         make $make_opts
         popd
-    elif [ "$BUILD_TARGET" == "linux_arm32"]; then
+    elif [ "$BUILD_TARGET" == "linux_arm32" ]; then
         ./configure --disable-ogg --enable-static --host ${_arch}
         make $make_opts
-    elif [ "$BUILD_TARGET" == "linux_arm64"]; then
+    elif [ "$BUILD_TARGET" == "linux_arm64" ]; then
         ./configure --disable-ogg --enable-static --host ${_arch}
         make $make_opts
     else
@@ -185,10 +185,10 @@ if [ ! -d opus-$opus ]; then
             --disable-extra-programs
         make $make_opts
         popd
-    elif [ "$BUILD_TARGET" == "linux_arm32"]; then
+    elif [ "$BUILD_TARGET" == "linux_arm32" ]; then
         ./configure --with-pic --host ${_arch}
         make $make_opts
-    elif [ "$BUILD_TARGET" == "linux_arm64"]; then
+    elif [ "$BUILD_TARGET" == "linux_arm64" ]; then
         ./configure --with-pic --host ${_arch}
         make $make_opts
     else

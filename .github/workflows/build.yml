@@ -29,10 +29,10 @@ jobs:
             os: macos-10.15
             os_name: macos
           - target: linux_arm32
-            os: ubuntu-20.04
+            os: ubuntu-18.04
             os_name: linux
           - target: linux_arm64
-            os: ubuntu-20.04
+            os: ubuntu-18.04
             os_name: linux
     env:
       BUILD_TARGET: ${{ matrix.target }}
