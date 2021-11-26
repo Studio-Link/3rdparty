@@ -37,10 +37,28 @@ fi
 
 if [ "$BUILD_TARGET" == "linux_arm32" ]; then
     _arch="arm-linux-gnueabihf"
+    wget http://ports.ubuntu.com/pool/main/a/alsa-lib/libasound2_1.1.3-5_armhf.deb
+    wget http://ports.ubuntu.com/pool/main/p/pulseaudio/libpulse0_11.1-1ubuntu7_armhf.deb
+    sudo dpkg-deb -x libasound2_1.1.3-5_armhf.deb /
+    sudo dpkg-deb -x libpulse0_11.1-1ubuntu7_armhf.deb /
+    pushd /usr/lib/arm-linux-gnueabihf
+    sudo cp -a libasound.so.2.0.0 /usr/arm-linux-gnueabihf/lib/libasound.so
+    sudo ln -s libpulse-simple.so.0.1.1 /usr/arm-linux-gnueabihf/lib/libpulse-simple.so
+    sudo ln -s libpulse.so.0.20.2 /usr/arm-linux-gnueabihf/lib/libpulse.so
+    popd
 fi
 
 if [ "$BUILD_TARGET" == "linux_arm64" ]; then
     _arch="aarch64-linux-gnu"
+    wget http://ports.ubuntu.com/pool/main/a/alsa-lib/libasound2_1.1.3-5_arm64.deb
+    wget http://ports.ubuntu.com/pool/main/p/pulseaudio/libpulse0_11.1-1ubuntu7_arm64.deb
+    sudo dpkg-deb -x libasound2_1.1.3-5_arm64.deb /
+    sudo dpkg-deb -x libpulse0_11.1-1ubuntu7_arm64.deb /
+    pushd /usr/lib/aarch64-linux-gnu
+    sudo ln -s libasound.so.2.0.0 /usr/aarch64-linux-gnu/lib/libasound.so
+    sudo ln -s libpulse-simple.so.0.1.1 /usr/aarch64-linux-gnu/lib/libpulse-simple.so
+    sudo ln -s libpulse.so.0.20.2 /usr/aarch64-linux-gnu/lib/libpulse.so
+    popd
 fi
 
 # Disabled builds (debugging)
