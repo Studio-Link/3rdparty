@@ -135,10 +135,10 @@ if [ ! -d soundio ]; then
         export MINGW_ARCH=64; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
     fi
     if [ "$BUILD_TARGET" == "linux_arm32" ]; then
-        cmake -D CMAKE_TOOLCHAIN_FILE=arm.cmake -D BUILD_TESTS=OFF ..
+        cmake -D CMAKE_TOOLCHAIN_FILE=arm.cmake -D BUILD_TESTS=OFF -D ENABLE_ALSA=ON -D ENABLE_PULSEAUDIO=ON ..
     fi
     if [ "$BUILD_TARGET" == "linux_arm64" ]; then
-        cmake -D CMAKE_TOOLCHAIN_FILE=aarch64.cmake -D BUILD_TESTS=OFF ..
+        cmake -D CMAKE_TOOLCHAIN_FILE=aarch64.cmake -D BUILD_TESTS=OFF -D ENABLE_ALSA=ON -D ENABLE_PULSEAUDIO=ON ..
     fi
     make
     popd
