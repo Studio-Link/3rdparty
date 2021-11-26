@@ -45,6 +45,9 @@ if [ "$BUILD_TARGET" == "linux_arm32" ]; then
     sudo cp -a libasound.so.2.0.0 /usr/arm-linux-gnueabihf/lib/libasound.so
     sudo ln -s libpulse-simple.so.0.1.1 /usr/arm-linux-gnueabihf/lib/libpulse-simple.so
     sudo ln -s libpulse.so.0.20.2 /usr/arm-linux-gnueabihf/lib/libpulse.so
+    cp -a /usr/include/alsa /usr/arm-linux-gnueabihf/include/
+    cp -a /usr/include/sys/asoundlib.h /usr/arm-linux-gnueabihf/include/sys/
+    cp -a /usr/include/pulse /usr/arm-linux-gnueabihf/include/
     popd
 fi
 
@@ -58,6 +61,9 @@ if [ "$BUILD_TARGET" == "linux_arm64" ]; then
     sudo ln -s libasound.so.2.0.0 /usr/aarch64-linux-gnu/lib/libasound.so
     sudo ln -s libpulse-simple.so.0.1.1 /usr/aarch64-linux-gnu/lib/libpulse-simple.so
     sudo ln -s libpulse.so.0.20.2 /usr/aarch64-linux-gnu/lib/libpulse.so
+    cp -a /usr/include/alsa /usr/aarch64-linux-gnu/include/
+    cp -a /usr/include/sys/asoundlib.h /usr/aarch64-linux-gnu/include/sys/
+    cp -a /usr/include/pulse /usr/arm-linux-gnueabihf/include/
     popd
 fi
 
