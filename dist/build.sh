@@ -42,8 +42,8 @@ if [ "$BUILD_TARGET" == "linux_arm32" ]; then
     sudo dpkg-deb -x libasound2_1.1.3-5_armhf.deb /
 #    sudo dpkg-deb -x libpulse0_11.1-1ubuntu7_armhf.deb /
     sudo cp -a /usr/lib/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/lib/
-    pushd /usr/arm-linux-gnuabihf/lib/
-    ln -s libasound.so.2.0.0 libasound.so
+    pushd /usr/arm-linux-gnueabihf/lib/
+    sudo ln -s libasound.so.2.0.0 libasound.so
     popd
     sudo cp -a /usr/include/alsa /usr/arm-linux-gnueabihf/include/
 #    sudo cp -a /usr/include/pulse /usr/arm-linux-gnueabihf/include/
@@ -57,7 +57,7 @@ if [ "$BUILD_TARGET" == "linux_arm64" ]; then
 #    sudo dpkg-deb -x libpulse0_11.1-1ubuntu7_arm64.deb /
     sudo cp -a /usr/lib/aarch64-linux-gnu/* /usr/aarch64-linux-gnu/lib/
     pushd /usr/aarch64-linux-gnu/lib/
-    ln -s libasound.so.2.0.0 libasound.so
+    sudo ln -s libasound.so.2.0.0 libasound.so
     popd
     sudo cp -a /usr/include/alsa /usr/aarch64-linux-gnu/include/
 #    sudo cp -a /usr/include/pulse /usr/aarch64-linux-gnu/include/
