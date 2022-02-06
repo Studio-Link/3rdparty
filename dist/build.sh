@@ -44,7 +44,6 @@ if [ "$BUILD_TARGET" == "linux_arm32" ]; then
     sudo cp -a /usr/lib/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/lib/
     sudo cp -a /usr/include/alsa /usr/arm-linux-gnueabihf/include/
 #    sudo cp -a /usr/include/pulse /usr/arm-linux-gnueabihf/include/
-    popd
 fi
 
 if [ "$BUILD_TARGET" == "linux_arm64" ]; then
