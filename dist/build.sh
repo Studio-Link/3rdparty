@@ -38,37 +38,63 @@ fi
 if [ "$BUILD_TARGET" == "linux_arm32" ]; then
     _arch="arm-linux-gnueabihf"
     wget http://ports.ubuntu.com/pool/main/a/alsa-lib/libasound2_1.1.3-5_armhf.deb
-    wget http://ports.ubuntu.com/pool/main/p/pulseaudio/libpulse0_11.1-1ubuntu7_armhf.deb
+#   wget http://ports.ubuntu.com/pool/main/p/pulseaudio/libpulse0_11.1-1ubuntu7_armhf.deb
     sudo dpkg-deb -x libasound2_1.1.3-5_armhf.deb /
-    sudo dpkg-deb -x libpulse0_11.1-1ubuntu7_armhf.deb /
-    pushd /usr/lib/arm-linux-gnueabihf
-    sudo cp -a libasound.so.2.0.0 /usr/arm-linux-gnueabihf/lib/libasound.so
-    sudo ln -s libpulse-simple.so.0.1.1 /usr/arm-linux-gnueabihf/lib/libpulse-simple.so
-    sudo ln -s libpulse.so.0.20.2 /usr/arm-linux-gnueabihf/lib/libpulse.so
+#    sudo dpkg-deb -x libpulse0_11.1-1ubuntu7_armhf.deb /
+    sudo cp -a /usr/lib/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/lib/
     sudo cp -a /usr/include/alsa /usr/arm-linux-gnueabihf/include/
-    sudo cp -a /usr/include/sys/asoundlib.h /usr/arm-linux-gnueabihf/include/sys/
-    sudo cp -a /usr/include/pulse /usr/arm-linux-gnueabihf/include/
+#    sudo cp -a /usr/include/pulse /usr/arm-linux-gnueabihf/include/
     popd
 fi
 
 if [ "$BUILD_TARGET" == "linux_arm64" ]; then
     _arch="aarch64-linux-gnu"
     wget http://ports.ubuntu.com/pool/main/a/alsa-lib/libasound2_1.1.3-5_arm64.deb
-    wget http://ports.ubuntu.com/pool/main/p/pulseaudio/libpulse0_11.1-1ubuntu7_arm64.deb
+#    wget http://ports.ubuntu.com/pool/main/p/pulseaudio/libpulse0_11.1-1ubuntu7_arm64.deb
     sudo dpkg-deb -x libasound2_1.1.3-5_arm64.deb /
-    sudo dpkg-deb -x libpulse0_11.1-1ubuntu7_arm64.deb /
-    pushd /usr/lib/aarch64-linux-gnu
-    sudo ln -s libasound.so.2.0.0 /usr/aarch64-linux-gnu/lib/libasound.so
-    sudo ln -s libpulse-simple.so.0.1.1 /usr/aarch64-linux-gnu/lib/libpulse-simple.so
-    sudo ln -s libpulse.so.0.20.2 /usr/aarch64-linux-gnu/lib/libpulse.so
+#    sudo dpkg-deb -x libpulse0_11.1-1ubuntu7_arm64.deb /
+    sudo cp -a /usr/lib/aarch64-linux-gnu/* /usr/aarch64-linux-gnu/lib/
     sudo cp -a /usr/include/alsa /usr/aarch64-linux-gnu/include/
-    sudo cp -a /usr/include/sys/asoundlib.h /usr/aarch64-linux-gnu/include/sys/
-    sudo cp -a /usr/include/pulse /usr/arm-linux-gnueabihf/include/
-    popd
+#    sudo cp -a /usr/include/pulse /usr/aarch64-linux-gnu/include/
 fi
 
 # Disabled builds (debugging)
 #mkdir libsamplerate openssl-${openssl} soundio flac-${flac} opus-$opus
+
+# Build soundio
+#-----------------------------------------------------------------------------
+if [ ! -d soundio ]; then
+    sl_get_soundio
+    pushd soundio
+    mkdir build
+    pushd build
+    if [ "$BUILD_TARGET" == "linux" ]; then
+        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release -D ENABLE_JACK=OFF ..
+    fi
+    if [ "$BUILD_TARGET" == "linuxjack" ]; then
+        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
+    fi
+    if [ "$BUILD_OS" == "macos" ]; then
+        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
+    fi
+    if [ "$BUILD_TARGET" == "windows32" ]; then
+        export MINGW_ARCH=32; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
+    fi
+    if [ "$BUILD_TARGET" == "windows64" ]; then
+        export MINGW_ARCH=64; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
+    fi
+    if [ "$BUILD_TARGET" == "linux_arm32" ]; then
+        cmake -D CMAKE_TOOLCHAIN_FILE=arm.cmake -D BUILD_TESTS=OFF -D ENABLE_ALSA=ON -D ENABLE_PULSEAUDIO=ON ..
+    fi
+    if [ "$BUILD_TARGET" == "linux_arm64" ]; then
+        cmake -D CMAKE_TOOLCHAIN_FILE=aarch64.cmake -D BUILD_TESTS=OFF -D ENABLE_ALSA=ON -D ENABLE_PULSEAUDIO=ON ..
+    fi
+    make
+    popd
+
+    cp -a build/libsoundio.a ../3rdparty/lib/
+    popd
+fi
 
 # Build libsamplerate
 #-----------------------------------------------------------------------------
@@ -118,40 +144,6 @@ if [ ! -d openssl-${openssl} ]; then
     popd
 fi
 
-# Build soundio
-#-----------------------------------------------------------------------------
-if [ ! -d soundio ]; then
-    sl_get_soundio
-    pushd soundio
-    mkdir build
-    pushd build
-    if [ "$BUILD_TARGET" == "linux" ]; then
-        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release -D ENABLE_JACK=OFF ..
-    fi
-    if [ "$BUILD_TARGET" == "linuxjack" ]; then
-        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
-    fi
-    if [ "$BUILD_OS" == "macos" ]; then
-        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
-    fi
-    if [ "$BUILD_TARGET" == "windows32" ]; then
-        export MINGW_ARCH=32; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
-    fi
-    if [ "$BUILD_TARGET" == "windows64" ]; then
-        export MINGW_ARCH=64; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
-    fi
-    if [ "$BUILD_TARGET" == "linux_arm32" ]; then
-        cmake -D CMAKE_TOOLCHAIN_FILE=arm.cmake -D BUILD_TESTS=OFF -D ENABLE_ALSA=ON -D ENABLE_PULSEAUDIO=ON ..
-    fi
-    if [ "$BUILD_TARGET" == "linux_arm64" ]; then
-        cmake -D CMAKE_TOOLCHAIN_FILE=aarch64.cmake -D BUILD_TESTS=OFF -D ENABLE_ALSA=ON -D ENABLE_PULSEAUDIO=ON ..
-    fi
-    make
-    popd
-
-    cp -a build/libsoundio.a ../3rdparty/lib/
-    popd
-fi
 
 # Build FLAC
 #-----------------------------------------------------------------------------
