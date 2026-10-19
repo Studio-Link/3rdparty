@@ -108,14 +108,14 @@ if [ ! -d libsamplerate ]; then
     pushd libsamplerate
     ./autogen.sh
     if [ -n "${_arch}" ]; then
-        ./configure --host=${_arch}
+        ./configure --host=${_arch} --enable-static
     else
-        ./configure
+        ./configure --enable-static
     fi
     make
 
     cp -a ./src/.libs/libsamplerate.a ../3rdparty/lib/
-    cp -a ./src/samplerate.h ../3rdparty/include/
+    cp -a ./include/samplerate.h ../3rdparty/include/
     popd
 fi
 
