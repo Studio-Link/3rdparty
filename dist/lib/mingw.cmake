@@ -24,11 +24,19 @@ set(MINGW_PREFIX                    "/usr")
 # Linux mingw requires explicitly defined tools to prevent clash with native system tools
 set(MINGW_TOOL_PREFIX               ${MINGW_PREFIX}/bin/${CMAKE_SYSTEM_PROCESSOR}-w64-mingw32-)
 
+# Debian/Ubuntu ship win32 and posix thread variants of the compilers, use
+# the posix one (default on Arch/MSYS2)
+set(MINGW_TOOL_SUFFIX               "")
+if(EXISTS ${MINGW_TOOL_PREFIX}gcc-posix)
+        set(MINGW_TOOL_SUFFIX       "-posix")
+endif()
+
 # Windows msys mingw ships with a mostly suitable preconfigured environment
 if(DEFINED ENV{MSYSCON})
         set(CMAKE_GENERATOR         "MSYS Makefiles" CACHE STRING "" FORCE)
         set(MINGW_PREFIX            "/mingw${MINGW_ARCH}")
         set(MINGW_TOOL_PREFIX       "${MINGW_PREFIX}/bin/") 
+        set(MINGW_TOOL_SUFFIX       "")
 
         # Msys compiler does not support @CMakeFiles/Include syntax
         set(CMAKE_C_USE_RESPONSE_FILE_FOR_INCLUDES   OFF)
@@ -40,8 +48,8 @@ set(CMAKE_FIND_ROOT_PATH            ${MINGW_PREFIX})
 set(CMAKE_INSTALL_PREFIX            ${MINGW_PREFIX})
 
 # which compilers to use for C and C++
-set(CMAKE_C_COMPILER                ${MINGW_TOOL_PREFIX}gcc)
-set(CMAKE_CXX_COMPILER              ${MINGW_TOOL_PREFIX}g++)
+set(CMAKE_C_COMPILER                ${MINGW_TOOL_PREFIX}gcc${MINGW_TOOL_SUFFIX})
+set(CMAKE_CXX_COMPILER              ${MINGW_TOOL_PREFIX}g++${MINGW_TOOL_SUFFIX})
 set(CMAKE_RC_COMPILER               ${MINGW_TOOL_PREFIX}windres)
 
 # adjust the default behaviour of the FIND_XXX() commands:

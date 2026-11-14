@@ -11,58 +11,58 @@ jobs:
       matrix:
         include:
           - target: windows64
-            os: ubuntu-20.04
+            os: ubuntu-latest
             os_name: mingw
           - target: windows32
-            os: ubuntu-20.04
+            os: ubuntu-latest
             os_name: mingw
           - target: linux
-            os: ubuntu-18.04
+            os: ubuntu-22.04
             os_name: linux
           - target: linuxjack
-            os: ubuntu-18.04
+            os: ubuntu-22.04
             os_name: linux
           - target: macos_x86_64
-            os: macos-10.15
+            os: macos-15
             os_name: macos
           - target: macos_arm64
-            os: macos-10.15
+            os: macos-15
             os_name: macos
           - target: linux_arm32
-            os: ubuntu-18.04
+            os: ubuntu-22.04
             os_name: linux
           - target: linux_arm64
-            os: ubuntu-18.04
+            os: ubuntu-22.04
             os_name: linux
     env:
       BUILD_TARGET: ${{ matrix.target }}
       BUILD_OS: ${{ matrix.os_name }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
 
     - name: setup build linux
       if: ${{ matrix.os_name == 'linux' }}
       run: |
-        sudo apt-get install -y libasound2-dev \
+        sudo apt-get update
+        sudo apt-get install -y cmake zip \
+                                libasound2-dev \
                                 libjack-jackd2-dev \
                                 libpulse-dev \
-                                libpulse0 \
-                                vim-common \
                                 gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
                                 gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 
     - name: setup build macos
       if: ${{ matrix.os_name == 'macos' }}
-      run: brew install automake
+      run: brew install cmake || true
 
-    - uses: sreimers/action-archlinux-mingw@main
+    - name: setup build mingw
       if: ${{ matrix.os_name == 'mingw' }}
-      with:
-        run: "./dist/build.sh"
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mingw-w64 cmake zip
 
     - name: build
-      if: ${{ matrix.os_name == 'linux' || matrix.os_name == 'macos' }}
       run: ./dist/build.sh
 
     - name: Upload release

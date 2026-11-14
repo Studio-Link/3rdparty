@@ -1,0 +1,21 @@
+diff --color -Nru a/src/hostapi/pulseaudio/pa_linux_pulseaudio.c b/src/hostapi/pulseaudio/pa_linux_pulseaudio.c
+--- a/src/hostapi/pulseaudio/pa_linux_pulseaudio.c	2026-11-13 00:34:10.000000000 +0000
++++ b/src/hostapi/pulseaudio/pa_linux_pulseaudio.c	2026-11-14 19:51:45.404618920 +0000
+@@ -799,6 +799,17 @@
+         pulseaudioHostApi = NULL;
+     }
+ 
++    /* Do not hand out the freed representation. A missing or failing
++       PulseAudio server is not fatal for Pa_Initialize(): skip this host
++       API like the JACK host API does, so ALSA/JACK stay usable. */
++    *hostApi = NULL;
++    if( result != paInsufficientMemory )
++    {
++        PA_DEBUG( ("Portaudio %s: PulseAudio not available, skipping\n",
++                   __FUNCTION__) );
++        result = paNoError;
++    }
++
+     return result;
+ }
+ 

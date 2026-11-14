@@ -1,234 +1,204 @@
 #!/bin/bash -ex
+#
+# Builds all static 3rdparty libraries for one target into build/3rdparty
+# and packs them as build/$BUILD_TARGET.zip
+#
+# BUILD_TARGET: linux | linuxjack | linux_arm32 | linux_arm64 |
+#               windows32 | windows64 | macos_x86_64 | macos_arm64
+# BUILD_OS:     linux | mingw | macos
+#
 
 source dist/lib/versions.sh
 source dist/lib/functions.sh
 
-make_opts="-j4"
+DIST="$(pwd)/dist"
+JOBS="${JOBS:-4}"
+make_opts="-j$JOBS"
 
 # Prepare build
 #-----------------------------------------------------------------------------
 sl_prepare
 
-if [ "$BUILD_OS" == "macos" ]; then
-    export MACOSX_DEPLOYMENT_TARGET=10.10
-fi
+_toolchain=""
+_host=""
+openssl_target=""
+portaudio_opts=""
 
-if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-    xcode="/Applications/Xcode_12.2.app/Contents/Developer"
-    sysroot="$xcode/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-    sudo xcode-select --switch $xcode
-    BUILD_CFLAGS="$CFLAGS -arch arm64 -isysroot $sysroot"
-    BUILD_CXXFLAGS="$CXXFLAGS -arch arm64 -isysroot $sysroot"
-    export CFLAGS=$BUILD_CFLAGS
-    export CXXFLAGS=$BUILD_CXXFLAGS
-    _arch="arm64-apple-darwin"
-fi
+case "$BUILD_TARGET" in
+    linux|linuxjack)
+        openssl_target="linux-$(uname -m)"
+        # libasound is loaded with dlopen at runtime, so the binary also starts
+        # on systems without ALSA. PulseAudio (and JACK) are linked dynamically.
+        portaudio_opts="-DPA_USE_ALSA=ON -DPA_ALSA_DYNAMIC=ON"
+        portaudio_opts+=" -DPA_USE_PULSEAUDIO=ON -DPA_USE_OSS=OFF"
+        portaudio_opts+=" -DPA_USE_SNDIO=OFF"
+        if [ "$BUILD_TARGET" == "linuxjack" ]; then
+            portaudio_opts+=" -DPA_USE_JACK=ON"
+        else
+            portaudio_opts+=" -DPA_USE_JACK=OFF"
+        fi
+        ;;
+    linux_arm32|linux_arm64)
+        if [ "$BUILD_TARGET" == "linux_arm32" ]; then
+            _host="arm-linux-gnueabihf"
+            _toolchain="$DIST/lib/arm.cmake"
+            openssl_target="linux-armv4"
+        else
+            _host="aarch64-linux-gnu"
+            _toolchain="$DIST/lib/aarch64.cmake"
+            openssl_target="linux-aarch64"
+        fi
+        portaudio_opts="-DPA_USE_ALSA=ON -DPA_ALSA_DYNAMIC=ON"
+        portaudio_opts+=" -DPA_USE_PULSEAUDIO=OFF -DPA_USE_JACK=OFF"
+        portaudio_opts+=" -DPA_USE_OSS=OFF -DPA_USE_SNDIO=OFF"
+        ;;
+    windows32|windows64)
+        if [ "$BUILD_TARGET" == "windows32" ]; then
+            export MINGW_ARCH=32
+            _host="i686-w64-mingw32"
+            openssl_target="mingw"
+        else
+            export MINGW_ARCH=64
+            _host="x86_64-w64-mingw32"
+            openssl_target="mingw64"
+        fi
+        _toolchain="$DIST/lib/mingw.cmake"
+        portaudio_opts="-DPA_USE_WASAPI=ON -DPA_USE_WDMKS=ON -DPA_USE_WMME=ON"
+        portaudio_opts+=" -DPA_USE_DS=ON -DPA_USE_ASIO=OFF -DPA_USE_JACK=OFF"
+        portaudio_opts+=" -DPA_DLL_LINK_WITH_STATIC_RUNTIME=OFF"
+        unset CC CXX
+        ;;
+    macos_x86_64|macos_arm64)
+        export MACOSX_DEPLOYMENT_TARGET=10.13
+        if [ "$BUILD_TARGET" == "macos_arm64" ]; then
+            _macos_arch="arm64"
+            _host="aarch64-apple-darwin"
+            openssl_target="darwin64-arm64-cc"
+        else
+            _macos_arch="x86_64"
+            _host="x86_64-apple-darwin"
+            openssl_target="darwin64-x86_64-cc"
+        fi
+        export CFLAGS="$CFLAGS -arch $_macos_arch"
+        export CXXFLAGS="$CXXFLAGS -arch $_macos_arch"
+        export LDFLAGS="$LDFLAGS -arch $_macos_arch"
+        portaudio_opts="-DPA_USE_JACK=OFF"
+        ;;
+    *)
+        echo "unknown BUILD_TARGET: $BUILD_TARGET"
+        exit 1
+        ;;
+esac
 
-if [ "$BUILD_OS" == "mingw" ]; then
-    if [ "$BUILD_TARGET" == "windows32" ]; then
-        _arch="i686-w64-mingw32"
-    else
-        _arch="x86_64-w64-mingw32"
-    fi
+cmake_args="$(sl_cmake_args)"
 
-    unset CC
-    unset CXX
-fi
-
-if [ "$BUILD_TARGET" == "linux_arm32" ]; then
-    _arch="arm-linux-gnueabihf"
-    wget http://ports.ubuntu.com/pool/main/a/alsa-lib/libasound2_1.1.3-5_armhf.deb
-#   wget http://ports.ubuntu.com/pool/main/p/pulseaudio/libpulse0_11.1-1ubuntu7_armhf.deb
-    sudo dpkg-deb -x libasound2_1.1.3-5_armhf.deb /
-#    sudo dpkg-deb -x libpulse0_11.1-1ubuntu7_armhf.deb /
-    sudo cp -a /usr/lib/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/lib/
-    pushd /usr/arm-linux-gnueabihf/lib/
-    sudo ln -s libasound.so.2.0.0 libasound.so
-    popd
-    sudo cp -a /usr/include/alsa /usr/arm-linux-gnueabihf/include/
-#    sudo cp -a /usr/include/pulse /usr/arm-linux-gnueabihf/include/
-fi
-
-if [ "$BUILD_TARGET" == "linux_arm64" ]; then
-    _arch="aarch64-linux-gnu"
-    wget http://ports.ubuntu.com/pool/main/a/alsa-lib/libasound2_1.1.3-5_arm64.deb
-#    wget http://ports.ubuntu.com/pool/main/p/pulseaudio/libpulse0_11.1-1ubuntu7_arm64.deb
-    sudo dpkg-deb -x libasound2_1.1.3-5_arm64.deb /
-#    sudo dpkg-deb -x libpulse0_11.1-1ubuntu7_arm64.deb /
-    sudo cp -a /usr/lib/aarch64-linux-gnu/* /usr/aarch64-linux-gnu/lib/
-    pushd /usr/aarch64-linux-gnu/lib/
-    sudo ln -s libasound.so.2.0.0 libasound.so
-    popd
-    sudo cp -a /usr/include/alsa /usr/aarch64-linux-gnu/include/
-#    sudo cp -a /usr/include/pulse /usr/aarch64-linux-gnu/include/
-fi
-
-# Disabled builds (debugging)
-#mkdir libsamplerate openssl-${openssl} soundio flac-${flac} opus-$opus
-
-# Build soundio
+# PortAudio
 #-----------------------------------------------------------------------------
-if [ ! -d soundio ]; then
-    sl_get_soundio
-    pushd soundio
-    mkdir build
-    pushd build
-    if [ "$BUILD_TARGET" == "linux" ]; then
-        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release -D ENABLE_JACK=OFF ..
-    fi
-    if [ "$BUILD_TARGET" == "linuxjack" ]; then
-        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
-    fi
-    if [ "$BUILD_OS" == "macos" ]; then
-        cmake -D BUILD_DYNAMIC_LIBS=OFF -D CMAKE_BUILD_TYPE=Release ..
-    fi
-    if [ "$BUILD_TARGET" == "windows32" ]; then
-        export MINGW_ARCH=32; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
-    fi
-    if [ "$BUILD_TARGET" == "windows64" ]; then
-        export MINGW_ARCH=64; cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D BUILD_TESTS=OFF ..
-    fi
-    if [ "$BUILD_TARGET" == "linux_arm32" ]; then
-        cmake -D CMAKE_TOOLCHAIN_FILE=arm.cmake -D BUILD_TESTS=OFF -D ENABLE_ALSA=ON -D ENABLE_PULSEAUDIO=ON ..
-    fi
-    if [ "$BUILD_TARGET" == "linux_arm64" ]; then
-        cmake -D CMAKE_TOOLCHAIN_FILE=aarch64.cmake -D BUILD_TESTS=OFF -D ENABLE_ALSA=ON -D ENABLE_PULSEAUDIO=ON ..
-    fi
-    make
-    popd
+if [ ! -f "$PREFIX/lib/libportaudio.a" ]; then
+    sl_fetch "https://github.com/PortAudio/portaudio/archive/${portaudio}.tar.gz" \
+        "portaudio-${portaudio}.tar.gz" "$portaudio_sha256"
+    rm -rf portaudio && mkdir portaudio
+    tar --no-same-owner -xzf "portaudio-${portaudio}.tar.gz" -C portaudio --strip-components=1
+    patch -d portaudio -p1 < "$DIST/patches/portaudio_pulseaudio_optional.patch"
 
-    cp -a build/libsoundio.a ../3rdparty/lib/
-    popd
+    cmake -S portaudio -B portaudio/build $cmake_args \
+        -DPA_BUILD_SHARED_LIBS=OFF -DPA_BUILD_TESTS=OFF \
+        -DPA_BUILD_EXAMPLES=OFF $portaudio_opts
+    cmake --build portaudio/build -j "$JOBS"
+    cmake --install portaudio/build
+
+    # lock-free ring buffer (compiled into libportaudio.a, header is private)
+    cp -a portaudio/src/common/pa_ringbuffer.h "$PREFIX/include/"
 fi
 
-# Build libsamplerate
+# libsamplerate
 #-----------------------------------------------------------------------------
-if [ ! -d libsamplerate ]; then
-    git clone https://github.com/studio-link-3rdparty/libsamplerate.git
-    pushd libsamplerate
-    ./autogen.sh
-    if [ -n "${_arch}" ]; then
-        ./configure --host=${_arch} --enable-static
-    else
-        ./configure --enable-static
-    fi
-    make
+if [ ! -f "$PREFIX/lib/libsamplerate.a" ]; then
+    sl_fetch "https://github.com/libsndfile/libsamplerate/releases/download/${libsamplerate}/libsamplerate-${libsamplerate}.tar.xz" \
+        "libsamplerate-${libsamplerate}.tar.xz" "$libsamplerate_sha256"
+    rm -rf libsamplerate-${libsamplerate}
+    tar --no-same-owner -xf libsamplerate-${libsamplerate}.tar.xz
 
-    cp -a ./src/.libs/libsamplerate.a ../3rdparty/lib/
-    cp -a ./include/samplerate.h ../3rdparty/include/
-    popd
+    cmake -S libsamplerate-${libsamplerate} \
+        -B libsamplerate-${libsamplerate}/build $cmake_args \
+        -DBUILD_TESTING=OFF -DLIBSAMPLERATE_EXAMPLES=OFF \
+        -DLIBSAMPLERATE_INSTALL=ON
+    cmake --build libsamplerate-${libsamplerate}/build -j "$JOBS"
+    cmake --install libsamplerate-${libsamplerate}/build
 fi
 
-# Build openssl
+# OpenSSL
 #-----------------------------------------------------------------------------
-if [ ! -d openssl-${openssl} ]; then
-    sl_get_openssl
-    pushd openssl
-    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-        ./Configure no-shared darwin64-arm64-cc
-    elif [ "$BUILD_TARGET" == "windows32" ]; then
-		CC=${_arch}-gcc RANLIB=${_arch}-ranlib AR=${_arch}-ar \
-		./Configure mingw no-shared no-threads
-    elif [ "$BUILD_TARGET" == "windows64" ]; then
-		CC=${_arch}-gcc RANLIB=${_arch}-ranlib AR=${_arch}-ar \
-		./Configure mingw64 no-shared no-threads
-    elif [ "$BUILD_TARGET" == "linux_arm32" ]; then
-		./Configure linux-generic32 no-shared no-threads \
-            --cross-compile-prefix=${_arch}-
-    elif [ "$BUILD_TARGET" == "linux_arm64" ]; then
-		./Configure linux-generic64 no-shared no-threads \
-            --cross-compile-prefix=${_arch}-
-    else
-        ./config no-shared
+if [ ! -f "$PREFIX/lib/libssl.a" ]; then
+    sl_fetch "https://github.com/openssl/openssl/releases/download/openssl-${openssl}/openssl-${openssl}.tar.gz" \
+        "openssl-${openssl}.tar.gz" "$openssl_sha256"
+    rm -rf openssl-${openssl}
+    tar --no-same-owner -xzf openssl-${openssl}.tar.gz
+    pushd openssl-${openssl}
+
+    openssl_opts="no-shared no-tests no-docs no-apps --prefix=$PREFIX"
+    openssl_opts+=" --libdir=lib"
+    if [ -n "$_host" ] && [ "$BUILD_OS" != "macos" ]; then
+        openssl_opts+=" --cross-compile-prefix=${_host}-"
+    fi
+    if [ "$BUILD_OS" == "mingw" ]; then
+        openssl_opts+=" no-threads"
     fi
 
+    # Debian/Ubuntu mingw-w64: posix thread variant (see dist/lib/mingw.cmake)
+    # (Configure stores CC in the Makefile, so it is only needed here)
+    openssl_cc=""
+    if [ "$BUILD_OS" == "mingw" ] && command -v ${_host}-gcc-posix > /dev/null; then
+        openssl_cc="CC=gcc-posix CXX=g++-posix"
+    fi
+
+    env $openssl_cc ./Configure $openssl_target $openssl_opts
     make $make_opts build_libs
-    cp -a include/openssl ../3rdparty/include/
-    cp -a *.a ../3rdparty/lib/
-
+    make install_dev
     popd
 fi
 
-
-# Build FLAC
+# FLAC
 #-----------------------------------------------------------------------------
-if [ ! -d flac-${flac} ]; then
-    sl_get_flac
+if [ ! -f "$PREFIX/lib/libFLAC.a" ]; then
+    sl_fetch "https://github.com/xiph/flac/releases/download/${flac}/flac-${flac}.tar.xz" \
+        "flac-${flac}.tar.xz" "$flac_sha256"
+    rm -rf flac-${flac}
+    tar --no-same-owner -xf flac-${flac}.tar.xz
 
-    pushd flac
-    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-        ./configure --disable-ogg --enable-static --host arm-apple-darwin
-        make $make_opts
-    elif [ "$BUILD_OS" == "mingw" ]; then
-        mkdir build_win
-        pushd build_win
-        ${_arch}-configure --disable-ogg --enable-static --disable-cpplibs
-        make $make_opts
-        popd
-    elif [ "$BUILD_TARGET" == "linux_arm32" ]; then
-        ./configure --disable-ogg --enable-static --host ${_arch}
-        make $make_opts
-    elif [ "$BUILD_TARGET" == "linux_arm64" ]; then
-        ./configure --disable-ogg --enable-static --host ${_arch}
-        make $make_opts
-    else
-        ./configure --disable-ogg --enable-static
-        make $make_opts
-    fi
-
-    cp -a include/FLAC ../3rdparty/include/
-
-    if [ "$BUILD_OS" == "mingw" ]; then
-        cp -a build_win/src/libFLAC/.libs/libFLAC.a ../3rdparty/lib/
-    else
-        cp -a src/libFLAC/.libs/libFLAC.a ../3rdparty/lib/
-    fi
-
-    popd
+    cmake -S flac-${flac} -B flac-${flac}/build $cmake_args \
+        -DWITH_OGG=OFF -DBUILD_CXXLIBS=OFF -DBUILD_PROGRAMS=OFF \
+        -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DBUILD_DOCS=OFF \
+        -DINSTALL_MANPAGES=OFF -DINSTALL_PKGCONFIG_MODULES=ON
+    cmake --build flac-${flac}/build -j "$JOBS"
+    cmake --install flac-${flac}/build
 fi
 
-
-# Build opus
+# Opus
 #-----------------------------------------------------------------------------
-if [ ! -d opus-$opus ]; then
-    wget "https://archive.mozilla.org/pub/opus/opus-${opus}.tar.gz"
-    tar -xzf opus-${opus}.tar.gz
-    pushd opus-$opus
-    if [ "$BUILD_TARGET" == "macos_arm64" ]; then
-        ./configure --with-pic --host arm-apple-darwin --enable-float-approx
-        make
-    elif [ "$BUILD_OS" == "mingw" ]; then
-        mkdir build_win
-        pushd build_win
-        ${_arch}-configure \
-            --enable-custom-modes \
-            --disable-doc \
-            --disable-extra-programs
-        make $make_opts
-        popd
-    elif [ "$BUILD_TARGET" == "linux_arm32" ]; then
-        ./configure --with-pic --host ${_arch}
-        make $make_opts
-    elif [ "$BUILD_TARGET" == "linux_arm64" ]; then
-        ./configure --with-pic --host ${_arch}
-        make $make_opts
-    else
-        ./configure --with-pic
-        make
-    fi
-    popd
+if [ ! -f "$PREFIX/lib/libopus.a" ]; then
+    sl_fetch "https://downloads.xiph.org/releases/opus/opus-${opus}.tar.gz" \
+        "opus-${opus}.tar.gz" "$opus_sha256"
+    rm -rf opus-${opus}
+    tar --no-same-owner -xzf opus-${opus}.tar.gz
 
-    if [ "$BUILD_OS" == "mingw" ]; then
-        cp opus-$opus/build_win/.libs/libopus.a 3rdparty/lib/
-    else
-        cp opus-$opus/.libs/libopus.a 3rdparty/lib/
+    opus_opts="-DOPUS_BUILD_PROGRAMS=OFF -DOPUS_BUILD_TESTING=OFF"
+    opus_opts+=" -DOPUS_CUSTOM_MODES=ON -DOPUS_INSTALL_PKG_CONFIG_MODULE=ON"
+    opus_opts+=" -DOPUS_INSTALL_CMAKE_CONFIG_MODULE=ON"
+    if [ "$BUILD_OS" == "macos" ] || [ "$BUILD_OS" == "mingw" ]; then
+        # avoid stack protector and fortify issues with older SDKs/runtimes
+        opus_opts+=" -DOPUS_FORTIFY_SOURCE=OFF -DOPUS_STACK_PROTECTOR=OFF"
     fi
 
-    mkdir -p 3rdparty/include/opus
-    cp opus-$opus/include/*.h 3rdparty/include/opus/
-
+    cmake -S opus-${opus} -B opus-${opus}/build $cmake_args $opus_opts
+    cmake --build opus-${opus}/build -j "$JOBS"
+    cmake --install opus-${opus}/build
 fi
 
 # Prepare release upload
 #-----------------------------------------------------------------------------
-zip -r $BUILD_TARGET.zip 3rdparty
+# Only static libs and headers are shipped
+rm -rf 3rdparty/bin 3rdparty/share 3rdparty/lib/*.so* 3rdparty/lib/*.dylib \
+    3rdparty/lib/*.dll.a
+rm -f $BUILD_TARGET.zip
+zip -qr $BUILD_TARGET.zip 3rdparty
