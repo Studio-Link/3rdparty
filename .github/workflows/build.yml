@@ -65,10 +65,33 @@ jobs:
     - name: build
       run: ./dist/build.sh
 
-    - name: Upload release
-      uses: sreimers/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/v')
+    - uses: actions/upload-artifact@v7
       with:
-        files: build/${{ matrix.target }}.zip
+        name: ${{ matrix.target }}
+        path: build/${{ matrix.target }}.zip
+        if-no-files-found: error
+
+  # Publish all target zips as GitHub release (only for v* tags and only if
+  # every target was built, the app downloads them by target name)
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/download-artifact@v8
+      with:
+        path: release
+        merge-multiple: true
+
+    - name: upload release
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        TAG: ${{ github.ref_name }}
+      run: |
+        ls -l release
+        gh release view "$TAG" > /dev/null 2>&1 || \
+          gh release create "$TAG" --verify-tag --title "$TAG" --generate-notes
+        gh release upload "$TAG" release/*.zip --clobber
