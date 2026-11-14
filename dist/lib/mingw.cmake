@@ -45,7 +45,6 @@ endif()
 
 # The target environment
 set(CMAKE_FIND_ROOT_PATH            ${MINGW_PREFIX})
-set(CMAKE_INSTALL_PREFIX            ${MINGW_PREFIX})
 
 # which compilers to use for C and C++
 set(CMAKE_C_COMPILER                ${MINGW_TOOL_PREFIX}gcc${MINGW_TOOL_SUFFIX})
