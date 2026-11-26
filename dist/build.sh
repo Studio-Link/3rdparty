@@ -3,7 +3,7 @@
 # Builds all static 3rdparty libraries for one target into build/3rdparty
 # and packs them as build/$BUILD_TARGET.zip
 #
-# BUILD_TARGET: linux | linuxjack | linux_arm32 | linux_arm64 |
+# BUILD_TARGET: linux | linuxjack | linux_arm64 |
 #               windows32 | windows64 | macos_x86_64 | macos_arm64
 # BUILD_OS:     linux | mingw | macos
 #
@@ -24,8 +24,13 @@ _host=""
 openssl_target=""
 portaudio_opts=""
 
-case "$BUILD_TARGET" in
-    linux|linuxjack)
+_target="$BUILD_TARGET"
+if [ "$BUILD_TARGET" == "linux_arm64" ] && [ "$(uname -m)" == "aarch64" ]; then
+    _target="linux_native"
+fi
+
+case "$_target" in
+    linux|linuxjack|linux_native)
         openssl_target="linux-$(uname -m)"
         # libasound is loaded with dlopen at runtime, so the binary also starts
         # on systems without ALSA. PulseAudio (and JACK) are linked dynamically.
@@ -38,16 +43,10 @@ case "$BUILD_TARGET" in
             portaudio_opts+=" -DPA_USE_JACK=OFF"
         fi
         ;;
-    linux_arm32|linux_arm64)
-        if [ "$BUILD_TARGET" == "linux_arm32" ]; then
-            _host="arm-linux-gnueabihf"
-            _toolchain="$DIST/lib/arm.cmake"
-            openssl_target="linux-armv4"
-        else
-            _host="aarch64-linux-gnu"
-            _toolchain="$DIST/lib/aarch64.cmake"
-            openssl_target="linux-aarch64"
-        fi
+    linux_arm64)
+        _host="aarch64-linux-gnu"
+        _toolchain="$DIST/lib/aarch64.cmake"
+        openssl_target="linux-aarch64"
         portaudio_opts="-DPA_USE_ALSA=ON -DPA_ALSA_DYNAMIC=ON"
         portaudio_opts+=" -DPA_USE_PULSEAUDIO=OFF -DPA_USE_JACK=OFF"
         portaudio_opts+=" -DPA_USE_OSS=OFF -DPA_USE_SNDIO=OFF"

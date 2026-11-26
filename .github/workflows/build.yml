@@ -28,11 +28,8 @@ jobs:
           - target: macos_arm64
             os: macos-15
             os_name: macos
-          - target: linux_arm32
-            os: ubuntu-22.04
-            os_name: linux
           - target: linux_arm64
-            os: ubuntu-22.04
+            os: ubuntu-22.04-arm
             os_name: linux
     env:
       BUILD_TARGET: ${{ matrix.target }}
@@ -48,9 +45,7 @@ jobs:
         sudo apt-get install -y cmake zip \
                                 libasound2-dev \
                                 libjack-jackd2-dev \
-                                libpulse-dev \
-                                gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
-                                gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+                                libpulse-dev
 
     - name: setup build macos
       if: ${{ matrix.os_name == 'macos' }}
